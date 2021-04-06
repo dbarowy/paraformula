@@ -21,13 +21,19 @@ export module AST {
     }
   }
 
-  export interface AbsoluteAddress {
+  export interface AbsoluteAddressMode {
     kind: "AbsoluteAddress";
   }
-  export interface RelativeAddress {
+  export interface RelativeAddressMode {
     kind: "RelativeAddress";
   }
-  type AddressMode = AbsoluteAddress | RelativeAddress;
+  export const AbsoluteAddress: AbsoluteAddressMode = {
+    kind: "AbsoluteAddress",
+  };
+  export const RelativeAddress: RelativeAddressMode = {
+    kind: "RelativeAddress",
+  };
+  export type AddressMode = AbsoluteAddressMode | RelativeAddressMode;
 
   export class Address {
     public row: number;
@@ -75,6 +81,16 @@ export module AST {
 
     public toString(): string {
       return "(" + this.column.toString() + "," + this.row.toString() + ")";
+    }
+  }
+
+  export class Range {
+    public upperleft: Address;
+    public bottomright: Address;
+
+    constructor(upperleft: Address, bottomright: Address) {
+      this.upperleft = upperleft;
+      this.bottomright = bottomright;
     }
   }
 

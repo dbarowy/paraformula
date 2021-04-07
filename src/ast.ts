@@ -85,12 +85,26 @@ export module AST {
   }
 
   export class Range {
-    public upperleft: Address;
-    public bottomright: Address;
+    public regions: [Address, Address][] = [];
 
-    constructor(upperleft: Address, bottomright: Address) {
-      this.upperleft = upperleft;
-      this.bottomright = bottomright;
+    constructor(regions: [Address, Address][]) {
+      this.regions = regions;
+    }
+
+    /**
+     * Merge this range and another range into a discontiguous range.
+     * @param r The other range.
+     * @returns A discontiguous range.
+     */
+    public merge(r: Range): Range {
+      return new Range(this.regions.concat(r.regions));
+    }
+
+    /**
+     * Returns true if the range object represents a contiguous range.
+     */
+    public get isContiguous(): boolean {
+      return this.regions.length === 1;
     }
   }
 

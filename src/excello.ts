@@ -161,14 +161,14 @@ export module Excello {
   /**
    * Parses an A1 range suffix.
    */
-  export const rangeA1suffix = P.right<CU.CharStream, AST.Address>(P.str(":"))(
+  export const rangeA1Suffix = P.right<CU.CharStream, AST.Address>(P.str(":"))(
     addrA1
   );
 
   /**
    * Parses an R1C1 range suffix.
    */
-  export const rangeR1C1suffix = P.right<CU.CharStream, AST.Address>(
+  export const rangeR1C1Suffix = P.right<CU.CharStream, AST.Address>(
     P.str(":")
   )(addrR1C1);
 
@@ -177,14 +177,56 @@ export module Excello {
    */
   export const rangeA1Contig = P.pipe2<AST.Address, AST.Address, AST.Range>(
     addrA1
-  )(rangeA1suffix)((a1, a2) => new AST.Range(a1, a2));
+  )(rangeA1Suffix)((a1, a2) => new AST.Range([[a1, a2]]));
 
   /**
    * Parses an R1C1-style contiguous range.
    */
   export const rangeR1C1Contig = P.pipe2<AST.Address, AST.Address, AST.Range>(
     addrR1C1
-  )(rangeR1C1suffix)((a1, a2) => new AST.Range(a1, a2));
+  )(rangeR1C1Suffix)((a1, a2) => new AST.Range([[a1, a2]]));
+
+  /**
+   * Parses a comma surrounded by optional whitespace.
+   */
+  export const Comma = P.between<CU.CharStream, CU.CharStream, CU.CharStream>(
+    P.ws
+  )(P.ws)(P.str(","));
+
+  /**
+   * Parses a discontiguous A1-style range list.
+   */
+  export const rangeA1Discontig = P.seq<AST.Range[], AST.Range, AST.Range>(
+    // recursive case
+    P.many1(P.left<AST.Range, CU.CharStream>(rangeA1Contig)(Comma))
+  )(
+    // base case
+    rangeA1Contig
+  )(
+    // reducer
+    ([rs, r]) => rs.reduce((acc, r) => acc.merge(r)).merge(r)
+  );
+
+  /**
+   * Parses a discontiguous R1C1-style range list.
+   */
+  export const rangeR1C1Discontig = P.seq<AST.Range[], AST.Range, AST.Range>(
+    // recursive case
+    P.many1(P.left<AST.Range, CU.CharStream>(rangeR1C1Contig)(Comma))
+  )(
+    // base case
+    rangeR1C1Contig
+  )(
+    // reducer
+    ([rs, r]) => rs.reduce((acc, r) => acc.merge(r)).merge(r)
+  );
+
+  /**
+   * Parses any range, A1-style or R1C1-style, contiguous or discontiguous.
+   */
+  export const rangeAny = P.choice(
+    P.choice(rangeR1C1Discontig)(rangeR1C1Contig)
+  )(P.choice(rangeA1Discontig)(rangeA1Contig));
 
   /**
    * Top-level grammar definition.

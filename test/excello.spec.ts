@@ -350,22 +350,24 @@ describe("rangeA1Contig", () => {
   it("should parse a contiguous A1-style range", () => {
     const input = new CU.CharStream("A1:B1");
     const output = XL.rangeA1Contig(input);
-    const correct = new AST.Range(
-      new AST.Address(
-        1,
-        1,
-        AST.RelativeAddress,
-        AST.RelativeAddress,
-        Excello.EnvStub
-      ),
-      new AST.Address(
-        1,
-        2,
-        AST.RelativeAddress,
-        AST.RelativeAddress,
-        Excello.EnvStub
-      )
-    );
+    const correct = new AST.Range([
+      [
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          1,
+          2,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+      ],
+    ]);
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(correct);
@@ -378,22 +380,24 @@ describe("rangeA1Contig", () => {
   it("should parse a contiguous R1C1-style range", () => {
     const input = new CU.CharStream("R[1]C[-1]:R34C11102");
     const output = XL.rangeR1C1Contig(input);
-    const correct = new AST.Range(
-      new AST.Address(
-        1,
-        -1,
-        AST.RelativeAddress,
-        AST.RelativeAddress,
-        Excello.EnvStub
-      ),
-      new AST.Address(
-        34,
-        11102,
-        AST.AbsoluteAddress,
-        AST.AbsoluteAddress,
-        Excello.EnvStub
-      )
-    );
+    const correct = new AST.Range([
+      [
+        new AST.Address(
+          1,
+          -1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          34,
+          11102,
+          AST.AbsoluteAddress,
+          AST.AbsoluteAddress,
+          Excello.EnvStub
+        ),
+      ],
+    ]);
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(correct);
@@ -422,6 +426,150 @@ describe("rangeA1Contig", () => {
         assert.fail();
       default:
         assert(true);
+    }
+  });
+});
+
+describe("rangeA1Discontig", () => {
+  it("should consume a discontiguous A1-style range", () => {
+    const input = new CU.CharStream("A1:B10,C1:D10");
+    const output = XL.rangeA1Discontig(input);
+    const correct = new AST.Range([
+      [
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          10,
+          2,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+      ],
+      [
+        new AST.Address(
+          1,
+          3,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          10,
+          4,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+      ],
+    ]);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(correct);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+});
+
+describe("rangeR1C1Discontig", () => {
+  it("should consume a discontiguous R1C1-style range", () => {
+    const input = new CU.CharStream("R1C1:R10C2,R1C3:R10C4");
+    const output = XL.rangeR1C1Discontig(input);
+    const correct = new AST.Range([
+      [
+        new AST.Address(
+          1,
+          1,
+          AST.AbsoluteAddress,
+          AST.AbsoluteAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          10,
+          2,
+          AST.AbsoluteAddress,
+          AST.AbsoluteAddress,
+          Excello.EnvStub
+        ),
+      ],
+      [
+        new AST.Address(
+          1,
+          3,
+          AST.AbsoluteAddress,
+          AST.AbsoluteAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          10,
+          4,
+          AST.AbsoluteAddress,
+          AST.AbsoluteAddress,
+          Excello.EnvStub
+        ),
+      ],
+    ]);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(correct);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+});
+
+describe("rangeAny", () => {
+  it("should consume any range", () => {
+    const input = new CU.CharStream("A1:B10,C1:D10");
+    const output = XL.rangeAny(input);
+    const correct = new AST.Range([
+      [
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          10,
+          2,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+      ],
+      [
+        new AST.Address(
+          1,
+          3,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          10,
+          4,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+      ],
+    ]);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(correct);
+        break;
+      default:
+        assert.fail();
     }
   });
 });

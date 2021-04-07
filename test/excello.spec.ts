@@ -81,6 +81,68 @@ describe("addrMode", () => {
   });
 });
 
+describe("addrA1", () => {
+  it("should consume an ordinary A1 address", () => {
+    const input = new CU.CharStream("V43");
+    const output = XL.addrA1(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.row).to.equal(43);
+        expect(output.result.rowMode).to.equal(AST.RelativeAddress);
+        expect(output.result.column).to.equal(22);
+        expect(output.result.colMode).to.equal(AST.RelativeAddress);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should consume an absolutely-addressed A1 address", () => {
+    const input = new CU.CharStream("$C$12");
+    const output = XL.addrA1(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.row).to.equal(12);
+        expect(output.result.rowMode).to.equal(AST.AbsoluteAddress);
+        expect(output.result.column).to.equal(3);
+        expect(output.result.colMode).to.equal(AST.AbsoluteAddress);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should consume an A1 address with mixed modes (case 1)", () => {
+    const input = new CU.CharStream("$B1");
+    const output = XL.addrA1(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.row).to.equal(1);
+        expect(output.result.rowMode).to.equal(AST.RelativeAddress);
+        expect(output.result.column).to.equal(2);
+        expect(output.result.colMode).to.equal(AST.AbsoluteAddress);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should consume an A1 address with mixed modes (case 2)", () => {
+    const input = new CU.CharStream("AA$770");
+    const output = XL.addrA1(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.row).to.equal(770);
+        expect(output.result.rowMode).to.equal(AST.AbsoluteAddress);
+        expect(output.result.column).to.equal(27);
+        expect(output.result.colMode).to.equal(AST.RelativeAddress);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+});
+
 describe("addrR1C1", () => {
   it("should consume an R1 address", () => {
     const input = new CU.CharStream("R23C4");

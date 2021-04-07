@@ -30,10 +30,17 @@ export module Excello {
   );
 
   /**
+   * Parses an address mode token.
+   */
+  export const addrMode = P.choice(
+    P.pipe(P.str("$"))((cs) => AST.AbsoluteAddress)
+  )(P.pipe(P.ok(undefined))((cs) => AST.RelativeAddress));
+
+  /**
    * Top-level grammar definition.
    */
   export const grammar = P.right<CU.CharStream, AST.Address>(
-    P.left<CU.CharStream, CU.CharStream>(P.str("="))(P.ws)
+    P.left<CU.CharStream, CU.CharStream>(P.str("="))(P.str(""))
   )(addrR1C1);
 
   function parse(input: string): AST.Expr {

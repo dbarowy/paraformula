@@ -54,6 +54,33 @@ describe("addrC", () => {
   });
 });
 
+describe("addrMode", () => {
+  it("should return absolute address mode for $", () => {
+    const input = new CU.CharStream("$");
+    const output = XL.addrMode(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.equal(AST.AbsoluteAddress);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should return relative address mode for anything else", () => {
+    const input = new CU.CharStream("B33");
+    const output = XL.addrMode(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.equal(AST.RelativeAddress);
+        break;
+      default:
+        // should never fail
+        assert.fail();
+    }
+  });
+});
+
 describe("addrR1C1", () => {
   it("should consume an R1 address", () => {
     const input = new CU.CharStream("R23C4");

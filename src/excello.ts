@@ -3,7 +3,10 @@ import { Util } from "./util";
 import { Primitives as P, CharUtil as CU } from "parsecco";
 
 export module Excello {
-  const EnvStub = new AST.Env("", "", "");
+  /**
+   * TODO remove: this is a stub until parsecco supports parsing with user state.
+   */
+  export const EnvStub = new AST.Env("", "", "");
 
   /**
    * Parse an Excel integer.
@@ -154,6 +157,34 @@ export module Excello {
    * Parses either an A1 or R1C1 address.
    */
   export const anyAddr = P.choice(addrR1C1)(addrA1);
+
+  /**
+   * Parses an A1 range suffix.
+   */
+  export const rangeA1suffix = P.right<CU.CharStream, AST.Address>(P.str(":"))(
+    addrA1
+  );
+
+  /**
+   * Parses an R1C1 range suffix.
+   */
+  export const rangeR1C1suffix = P.right<CU.CharStream, AST.Address>(
+    P.str(":")
+  )(addrR1C1);
+
+  /**
+   * Parses an A1-style contiguous range.
+   */
+  export const rangeA1Contig = P.pipe2<AST.Address, AST.Address, AST.Range>(
+    addrA1
+  )(rangeA1suffix)((a1, a2) => new AST.Range(a1, a2));
+
+  /**
+   * Parses an R1C1-style contiguous range.
+   */
+  export const rangeR1C1Contig = P.pipe2<AST.Address, AST.Address, AST.Range>(
+    addrR1C1
+  )(rangeR1C1suffix)((a1, a2) => new AST.Range(a1, a2));
 
   /**
    * Top-level grammar definition.

@@ -1,7 +1,7 @@
 import { CharUtil as CU } from "parsecco";
-import { Excello as XL } from "../src/excello";
+import { Excello, Excello as XL } from "../src/excello";
 import { AST } from "../src/ast";
-import { assert, expect } from "chai";
+import { assert, Assertion, expect } from "chai";
 import "mocha";
 
 describe("Z", () => {
@@ -337,6 +337,86 @@ describe("addrR1C1", () => {
   it("should not consume an A1 address", () => {
     const input = new CU.CharStream("R1");
     const output = XL.addrR1C1(input);
+    switch (output.tag) {
+      case "success":
+        assert.fail();
+      default:
+        assert(true);
+    }
+  });
+});
+
+describe("rangeA1Contig", () => {
+  it("should parse a contiguous A1-style range", () => {
+    const input = new CU.CharStream("A1:B1");
+    const output = XL.rangeA1Contig(input);
+    const correct = new AST.Range(
+      new AST.Address(
+        1,
+        1,
+        AST.RelativeAddress,
+        AST.RelativeAddress,
+        Excello.EnvStub
+      ),
+      new AST.Address(
+        1,
+        2,
+        AST.RelativeAddress,
+        AST.RelativeAddress,
+        Excello.EnvStub
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(correct);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should parse a contiguous R1C1-style range", () => {
+    const input = new CU.CharStream("R[1]C[-1]:R34C11102");
+    const output = XL.rangeR1C1Contig(input);
+    const correct = new AST.Range(
+      new AST.Address(
+        1,
+        -1,
+        AST.RelativeAddress,
+        AST.RelativeAddress,
+        Excello.EnvStub
+      ),
+      new AST.Address(
+        34,
+        11102,
+        AST.AbsoluteAddress,
+        AST.AbsoluteAddress,
+        Excello.EnvStub
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(correct);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should not parse a mixed-style range (case 1)", () => {
+    const input = new CU.CharStream("A1:R1C2");
+    const output = XL.rangeR1C1Contig(input);
+    switch (output.tag) {
+      case "success":
+        assert.fail();
+      default:
+        assert(true);
+    }
+  });
+
+  it("should not parse a mixed-style range (case 2)", () => {
+    const input = new CU.CharStream("R1C1:B1");
+    const output = XL.rangeR1C1Contig(input);
     switch (output.tag) {
       case "success":
         assert.fail();

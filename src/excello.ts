@@ -6,25 +6,88 @@ export module Excello {
   const EnvStub = new AST.Env("", "", "");
 
   /**
-   * Parses the `R` part of an R1C1 address.
+   * Parse an Excel integer.
+   */
+  export const Z = P.choices(
+    // leading + sign
+    P.seq<CU.CharStream, number, number>(P.str("+"))(P.integer)(
+      ([, num]) => num
+    ),
+    // leading - sign
+    P.seq<CU.CharStream, number, number>(P.str("-"))(P.integer)(
+      ([, num]) => -num
+    ),
+    // no leading sign
+    P.integer
+  );
+
+  /**
+   * Parses the `R` part of an absolute R1C1 address.
    * @param istream input CharStream.
    */
   export const addrR = P.right<CU.CharStream, number>(P.str("R"))(P.integer);
 
   /**
-   * Parses the `C` part of an R1C1 address.
+   * Parses the `R` part of a relative R1C1 address.
+   */
+  export const addrRRel = P.between<CU.CharStream, CU.CharStream, number>(
+    P.str("R[")
+  )(P.str("]"))(Z);
+
+  /**
+   * Parses the `C` part of an absolute R1C1 address.
    * @param istream input CharStream.
    */
   export const addrC = P.right<CU.CharStream, number>(P.str("C"))(P.integer);
 
   /**
-   * Parses an R1C1 address.
-   * TODO: Fix env.
+   * Parses the `C` part of a relative R1C1 address.
+   * @param istream input CharStream.
    */
-  export const addrR1C1 = P.pipe2<number, number, AST.Address>(addrR)(addrC)(
-    (r: number, c: number) =>
-      new AST.Address(r, c, AST.RelativeAddress, AST.RelativeAddress, EnvStub)
+  export const addrCRel = P.between<CU.CharStream, CU.CharStream, number>(
+    P.str("C[")
+  )(P.str("]"))(Z);
+
+  /**
+   * Parses the `R` part of an R1C1 address.
+   */
+  export const addrRMode = P.choice(
+    P.pipe<number, [number, AST.AddressMode]>(addrRRel)((r) => [
+      r,
+      AST.RelativeAddress,
+    ])
+  )(
+    P.pipe<number, [number, AST.AddressMode]>(addrR)((r) => [
+      r,
+      AST.AbsoluteAddress,
+    ])
   );
+
+  /**
+   * Parses the `C` part of an R1C1 address.
+   */
+  export const addrCMode = P.choice(
+    P.pipe<number, [number, AST.AddressMode]>(addrCRel)((c) => [
+      c,
+      AST.RelativeAddress,
+    ])
+  )(
+    P.pipe<number, [number, AST.AddressMode]>(addrC)((c) => [
+      c,
+      AST.AbsoluteAddress,
+    ])
+  );
+
+  /**
+   * Parses an R1C1 address.
+   */
+  export const addrR1C1 = P.pipe2<
+    [number, AST.AddressMode],
+    [number, AST.AddressMode],
+    AST.Address
+  >(addrRMode)(addrCMode)(([row, rowMode], [col, colMode]) => {
+    return new AST.Address(row, col, rowMode, colMode, EnvStub);
+  });
 
   /**
    * Parses an address mode token.
@@ -86,6 +149,11 @@ export module Excello {
         EnvStub
       )
   );
+
+  /**
+   * Parses either an A1 or R1C1 address.
+   */
+  export const anyAddr = P.choice(addrR1C1)(addrA1);
 
   /**
    * Top-level grammar definition.

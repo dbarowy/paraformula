@@ -228,4 +228,17 @@ export module AST {
       return "Constant(" + this.value + ")";
     }
   }
+
+  export class StringLiteral extends ReferenceExpr {
+    public readonly value: string;
+
+    constructor(env: Env, value: string) {
+      super(env);
+      this.value = value;
+    }
+
+    public toString(): string {
+      return "StringLiteral(" + this.value + ")";
+    }
+  }
 }

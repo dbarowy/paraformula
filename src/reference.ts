@@ -277,4 +277,17 @@ export module ParaformulaReference {
       (n) => new AST.Constant(PP.EnvStub, n)
     )
   );
+
+  /**
+   * Parses a string literal.
+   */
+  export const stringLiteral = P.pipe(
+    P.between<CU.CharStream, CU.CharStream, CU.CharStream>(P.char('"'))(
+      P.char('"')
+    )(
+      P.pipe<CU.CharStream[], CU.CharStream>(P.many(P.sat((ch) => ch !== '"')))(
+        CU.CharStream.concat
+      )
+    )
+  )((s) => new AST.StringLiteral(PP.EnvStub, s.toString()));
 }

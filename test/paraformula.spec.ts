@@ -1060,3 +1060,21 @@ describe("constant", () => {
     }
   });
 });
+
+describe("stringLiteral", () => {
+  it("should parse a string literal", () => {
+    const input = new CU.CharStream('"Half shark alligator half man"');
+    const output = PRF.stringLiteral(input);
+    const expected = new AST.StringLiteral(
+      PP.EnvStub,
+      "Half shark alligator half man"
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});

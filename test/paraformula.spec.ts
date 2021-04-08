@@ -1,5 +1,5 @@
 import { CharUtil as CU } from "parsecco";
-import { Excello, Excello as XL } from "../src/excello";
+import { Paraformula, Paraformula as XL } from "../src/paraformula";
 import { AST } from "../src/ast";
 import { assert, Assertion, expect } from "chai";
 import "mocha";
@@ -357,14 +357,14 @@ describe("rangeA1Contig", () => {
           1,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           1,
           2,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
     ]);
@@ -387,14 +387,14 @@ describe("rangeA1Contig", () => {
           -1,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           34,
           11102,
           AST.AbsoluteAddress,
           AST.AbsoluteAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
     ]);
@@ -441,14 +441,14 @@ describe("rangeA1Discontig", () => {
           1,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           10,
           2,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
       [
@@ -457,14 +457,14 @@ describe("rangeA1Discontig", () => {
           3,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           10,
           4,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
     ]);
@@ -489,14 +489,14 @@ describe("rangeR1C1Discontig", () => {
           1,
           AST.AbsoluteAddress,
           AST.AbsoluteAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           10,
           2,
           AST.AbsoluteAddress,
           AST.AbsoluteAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
       [
@@ -505,14 +505,14 @@ describe("rangeR1C1Discontig", () => {
           3,
           AST.AbsoluteAddress,
           AST.AbsoluteAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           10,
           4,
           AST.AbsoluteAddress,
           AST.AbsoluteAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
     ]);
@@ -537,14 +537,14 @@ describe("rangeAny", () => {
           1,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           10,
           2,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
       [
@@ -553,14 +553,14 @@ describe("rangeAny", () => {
           3,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           10,
           4,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
     ]);
@@ -583,14 +583,14 @@ describe("rangeAny", () => {
           -1,
           AST.RelativeAddress,
           AST.RelativeAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
         new AST.Address(
           34,
           11102,
           AST.AbsoluteAddress,
           AST.AbsoluteAddress,
-          Excello.EnvStub
+          Paraformula.EnvStub
         ),
       ],
     ]);

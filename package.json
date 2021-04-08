@@ -1,16 +1,16 @@
 {
-  "name": "excello",
+  "name": "paraformula",
   "version": "1.0.0",
   "description": "An Excel formula language parser, written in Typescript",
-  "main": "./dist/excello.js",
-  "types": "./dist/excello.d.ts",
+  "main": "./dist/paraformula.js",
+  "types": "./dist/paraformula.d.ts",
   "scripts": {
     "test": "mocha -r ts-node/register test/*.spec.ts",
     "build": "tsc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dbarowy/excello.git"
+    "url": "git+https://github.com/dbarowy/paraformula.git"
   },
   "keywords": [
     "excel",
@@ -19,9 +19,9 @@
   "author": "Daniel W. Barowy",
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/dbarowy/excello/issues"
+    "url": "https://github.com/dbarowy/paraformula/issues"
   },
-  "homepage": "https://github.com/dbarowy/excello#readme",
+  "homepage": "https://github.com/dbarowy/paraformula#readme",
   "dependencies": {
     "parsecco": "^1.3.0"
   },

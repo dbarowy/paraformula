@@ -2,7 +2,7 @@ import { AST } from "./ast";
 import { Util } from "./util";
 import { Primitives as P, CharUtil as CU } from "parsecco";
 
-export module Excello {
+export module Paraformula {
   /**
    * TODO remove: this is a stub until parsecco supports parsing with user state.
    */

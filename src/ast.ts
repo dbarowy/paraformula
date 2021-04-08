@@ -185,7 +185,7 @@ export module AST {
 
     constructor(env: Env, address: Address) {
       super(env);
-      this.address = address;
+      this.address = address.copyWithNewEnv(env);
     }
 
     public toString(): string {

@@ -136,5 +136,5 @@ export module ParaformulaAddress {
   /**
    * Parses either an A1 or R1C1 address.
    */
-  export const anyAddr = P.choice(addrR1C1)(addrA1);
+  export const addrAny = P.choice(addrR1C1)(addrA1);
 }

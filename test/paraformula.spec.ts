@@ -713,7 +713,7 @@ describe("workbookName", () => {
 describe("rangePrefixQuoted", () => {
   it("should parse a workbook-worksheet prefix", () => {
     const input = new CU.CharStream("'[workbook]worksheet'");
-    const output = PRF.rangePrefixQuoted(input);
+    const output = PRF.quotedPrefix(input);
     switch (output.tag) {
       case "success":
         const [[p, wb], ws] = output.result;
@@ -728,7 +728,7 @@ describe("rangePrefixQuoted", () => {
 
   it("should parse a path-workbook-worksheet prefix", () => {
     const input = new CU.CharStream("'path[workbook]worksheet'");
-    const output = PRF.rangePrefixQuoted(input);
+    const output = PRF.quotedPrefix(input);
     switch (output.tag) {
       case "success":
         const [[p, wb], ws] = output.result;
@@ -872,6 +872,128 @@ describe("rangeReference", () => {
           ),
         ],
       ])
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
+describe("addressReference", () => {
+  it("should parse a bare address reference", () => {
+    const input = new CU.CharStream("A1");
+    const output = PRF.addressReference(input);
+    const expected = new AST.ReferenceAddress(
+      PP.EnvStub,
+      new AST.Address(
+        1,
+        1,
+        AST.RelativeAddress,
+        AST.RelativeAddress,
+        PP.EnvStub
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse an address reference with a worksheet", () => {
+    const input = new CU.CharStream("Sheet1!A1");
+    const output = PRF.addressReference(input);
+    const expectedEnv = new AST.Env("", "", "Sheet1");
+    const expected = new AST.ReferenceAddress(
+      expectedEnv,
+      new AST.Address(
+        1,
+        1,
+        AST.RelativeAddress,
+        AST.RelativeAddress,
+        expectedEnv
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse an address reference with a quoted worksheet", () => {
+    const input = new CU.CharStream("'Sheet1'!A1");
+    const output = PRF.addressReference(input);
+    const expectedEnv = new AST.Env("", "", "Sheet1");
+    const expected = new AST.ReferenceAddress(
+      expectedEnv,
+      new AST.Address(
+        1,
+        1,
+        AST.RelativeAddress,
+        AST.RelativeAddress,
+        expectedEnv
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse an address reference with a workbook and worksheet", () => {
+    const input = new CU.CharStream("'[Foobar]Sheet1'!A1");
+    const output = PRF.addressReference(input);
+    const expectedEnv = new AST.Env("", "Foobar", "Sheet1");
+    const expected = new AST.ReferenceAddress(
+      expectedEnv,
+      new AST.Address(
+        1,
+        1,
+        AST.RelativeAddress,
+        AST.RelativeAddress,
+        expectedEnv
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse this example similar to Microsoft's documentation", () => {
+    const input = new CU.CharStream(
+      "'C:\\Reports\\[SourceWorkbook.xlsx]Sheet1'!R34C[-78]"
+    );
+    const output = PRF.addressReference(input);
+    const expectedEnv = new AST.Env(
+      "C:\\Reports\\",
+      "SourceWorkbook.xlsx",
+      "Sheet1"
+    );
+    const expected = new AST.ReferenceAddress(
+      expectedEnv,
+      new AST.Address(
+        34,
+        -78,
+        AST.AbsoluteAddress,
+        AST.RelativeAddress,
+        expectedEnv
+      )
     );
     switch (output.tag) {
       case "success":

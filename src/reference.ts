@@ -78,7 +78,7 @@ export module ParaformulaReference {
   /**
    * Parses a quoted path-wb-ws prefix to a range.
    */
-  export const rangePrefixQuoted = P.between<
+  export const quotedPrefix = P.between<
     CU.CharStream,
     CU.CharStream,
     [[CU.CharStream, CU.CharStream], CU.CharStream]
@@ -103,7 +103,7 @@ export module ParaformulaReference {
     >(
       // first parse the path-wb-ws string
       P.left<[[CU.CharStream, CU.CharStream], CU.CharStream], CU.CharStream>(
-        rangePrefixQuoted
+        quotedPrefix
       )(P.char("!"))
     )(
       // then parse the range itself
@@ -164,4 +164,71 @@ export module ParaformulaReference {
       rangeReferenceBare(R)
     );
   }
+
+  /**
+   * Parses a fully-qualified address reference, i.e., an address that (optionally)
+   * includes a path, includes a workbook, and includes a worksheet.
+   */
+  export const addressReferenceWorkbook = P.pipe2<
+    [[CU.CharStream, CU.CharStream], CU.CharStream],
+    AST.Address,
+    AST.ReferenceAddress
+  >(
+    // first parse the path-wb-ws string
+    P.left<[[CU.CharStream, CU.CharStream], CU.CharStream], CU.CharStream>(
+      quotedPrefix
+    )(P.char("!"))
+  )(
+    // then parse the address itself
+    PA.addrAny
+  )(
+    // then stick them together and return a RangeAddress object
+    ([[p, wb], ws], a) =>
+      new AST.ReferenceAddress(
+        new AST.Env(p.toString(), wb.toString(), ws.toString()),
+        a
+      )
+  );
+
+  /**
+   * Parses an address reference that only includes a worksheet.
+   */
+  export const addressReferenceWorksheet = P.pipe2<
+    CU.CharStream,
+    AST.Address,
+    AST.ReferenceAddress
+  >(
+    // first parse the path-wb-ws string
+    P.left<CU.CharStream, CU.CharStream>(worksheetName)(P.char("!"))
+  )(
+    // then parse the address itself
+    PA.addrAny
+  )(
+    // then stick them together and return a RangeAddress object
+    (ws, a) =>
+      new AST.ReferenceAddress(
+        new AST.Env(PP.EnvStub.path, PP.EnvStub.workbookName, ws.toString()),
+        a
+      )
+  );
+
+  /**
+   * Parses a bare address reference.
+   */
+  export const addressReferenceBare = P.pipe<AST.Address, AST.ReferenceAddress>(
+    // parse the address itself
+    PA.addrAny
+  )(
+    // then return a RangeAddress object
+    (r) => new AST.ReferenceAddress(PP.EnvStub, r)
+  );
+
+  /**
+   * Parses any range reference.
+   */
+  export const addressReference = P.choices(
+    addressReferenceWorkbook,
+    addressReferenceWorksheet,
+    addressReferenceBare
+  );
 }

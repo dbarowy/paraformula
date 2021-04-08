@@ -229,6 +229,25 @@ export module Excello {
   )(P.choice(rangeA1Discontig)(rangeA1Contig));
 
   /**
+   * Parses a quoted worksheet name.
+   */
+  export const worksheetNameQuoted = (function () {
+    const normalChar = P.sat((ch) => ch !== "'");
+    const escapedChar = P.pipe<CU.CharStream, CU.CharStream>(P.str("''"))(
+      (s) => new CU.CharStream("'")
+    );
+    const chars = P.choice(normalChar)(escapedChar);
+    const many1Chars = P.pipe<CU.CharStream[], CU.CharStream>(
+      P.many1(chars)
+    )((cs) => CU.CharStream.concat(cs));
+    return P.pipe<CU.CharStream, CU.CharStream>(
+      P.between<CU.CharStream, CU.CharStream, CU.CharStream>(P.str("'"))(
+        P.str("'")
+      )(many1Chars)
+    )((cs) => new CU.CharStream("'" + cs.toString() + "'"));
+  })();
+
+  /**
    * Top-level grammar definition.
    */
   export const grammar = P.right<CU.CharStream, AST.Address>(

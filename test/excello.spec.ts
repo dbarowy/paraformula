@@ -527,7 +527,7 @@ describe("rangeR1C1Discontig", () => {
 });
 
 describe("rangeAny", () => {
-  it("should consume any range", () => {
+  it("should consume any A1 range", () => {
     const input = new CU.CharStream("A1:B10,C1:D10");
     const output = XL.rangeAny(input);
     const correct = new AST.Range([
@@ -569,6 +569,50 @@ describe("rangeAny", () => {
         expect(output.result).to.eql(correct);
         break;
       default:
+        assert.fail();
+    }
+  });
+
+  it("should parse a contiguous R1C1-style range", () => {
+    const input = new CU.CharStream("R[1]C[-1]:R34C11102");
+    const output = XL.rangeAny(input);
+    const correct = new AST.Range([
+      [
+        new AST.Address(
+          1,
+          -1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          Excello.EnvStub
+        ),
+        new AST.Address(
+          34,
+          11102,
+          AST.AbsoluteAddress,
+          AST.AbsoluteAddress,
+          Excello.EnvStub
+        ),
+      ],
+    ]);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(correct);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+});
+
+describe("worksheetNameQuoted", () => {
+  it("should parse a quoted string", () => {
+    const input = new CU.CharStream("'worksheet'");
+    const output = XL.worksheetNameQuoted(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.toString()).to.equal("'worksheet'");
+        break;
+      case "failure":
         assert.fail();
     }
   });

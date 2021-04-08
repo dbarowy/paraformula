@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/dbarowy/excello#readme",
   "dependencies": {
-    "parsecco": "^1.2.5"
+    "parsecco": "^1.3.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.16",

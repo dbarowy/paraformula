@@ -248,6 +248,30 @@ export module Excello {
   })();
 
   /**
+   * Parses any valid unquoted worksheet char name.
+   */
+  const isWorksheetChar = P.choices(
+    P.digit,
+    P.letter,
+    P.char("-"),
+    P.char(" ")
+  );
+
+  /**
+   * Parses an unquoted worksheet name.
+   */
+  export const worksheetNameUnquoted = P.pipe<CU.CharStream[], CU.CharStream>(
+    P.many1(isWorksheetChar)
+  )(CU.CharStream.concat);
+
+  /**
+   * Parses a worksheet name.
+   */
+  export const worksheetName = P.choice(worksheetNameQuoted)(
+    worksheetNameUnquoted
+  );
+
+  /**
    * Top-level grammar definition.
    */
   export const grammar = P.right<CU.CharStream, AST.Address>(

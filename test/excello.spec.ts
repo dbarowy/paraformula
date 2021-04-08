@@ -616,4 +616,66 @@ describe("worksheetNameQuoted", () => {
         assert.fail();
     }
   });
+
+  it("should not parse an unquoted string", () => {
+    const input = new CU.CharStream("worksheet");
+    const output = XL.worksheetNameQuoted(input);
+    switch (output.tag) {
+      case "success":
+        assert.fail();
+      case "failure":
+        assert(true);
+    }
+  });
+});
+
+describe("worksheetNameUnquoted", () => {
+  it("should parse an unquoted string", () => {
+    const input = new CU.CharStream("worksheet");
+    const output = XL.worksheetNameUnquoted(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.toString()).to.equal("worksheet");
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should not parse a quoted string", () => {
+    const input = new CU.CharStream("'worksheet'");
+    const output = XL.worksheetNameUnquoted(input);
+    switch (output.tag) {
+      case "success":
+        assert.fail();
+      case "failure":
+        assert(true);
+    }
+  });
+});
+
+describe("worksheetName", () => {
+  it("should parse an unquoted string", () => {
+    const input = new CU.CharStream("worksheet");
+    const output = XL.worksheetName(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.toString()).to.equal("worksheet");
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse a quoted string", () => {
+    const input = new CU.CharStream("'worksheet'");
+    const output = XL.worksheetName(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.toString()).to.equal("'worksheet'");
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
 });

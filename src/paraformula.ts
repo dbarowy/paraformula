@@ -372,7 +372,7 @@ export module Paraformula {
       // parse the range itself
       R
     )(
-      // then stick them together and return a RangeReference object
+      // then return a RangeReference object
       (r) => new AST.ReferenceRange(EnvStub, r)
     );
   }

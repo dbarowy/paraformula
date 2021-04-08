@@ -705,6 +705,38 @@ describe("workbookName", () => {
   });
 });
 
+describe("rangePrefixQuoted", () => {
+  it("should parse a workbook-worksheet prefix", () => {
+    const input = new CU.CharStream("'[workbook]worksheet'");
+    const output = PF.rangePrefixQuoted(input);
+    switch (output.tag) {
+      case "success":
+        const [[p, wb], ws] = output.result;
+        expect(p.toString()).to.equal("");
+        expect(wb.toString()).to.equal("workbook");
+        expect(ws.toString()).to.equal("worksheet");
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse a path-workbook-worksheet prefix", () => {
+    const input = new CU.CharStream("'path[workbook]worksheet'");
+    const output = PF.rangePrefixQuoted(input);
+    switch (output.tag) {
+      case "success":
+        const [[p, wb], ws] = output.result;
+        expect(p.toString()).to.equal("path");
+        expect(wb.toString()).to.equal("workbook");
+        expect(ws.toString()).to.equal("worksheet");
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
 describe("rangeReference", () => {
   it("should parse a bare range reference", () => {
     const input = new CU.CharStream("A1:B2");
@@ -726,6 +758,112 @@ describe("rangeReference", () => {
             AST.RelativeAddress,
             AST.RelativeAddress,
             PF.EnvStub
+          ),
+        ],
+      ])
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse a range reference with only a worksheet", () => {
+    const input = new CU.CharStream("sheetysheet!A1:B2");
+    const output = PF.rangeReference(PF.rangeAny)(input);
+    const expected = new AST.ReferenceRange(
+      new AST.Env("", "", "sheetysheet"),
+      new AST.Range([
+        [
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PF.EnvStub
+          ),
+          new AST.Address(
+            2,
+            2,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PF.EnvStub
+          ),
+        ],
+      ])
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse a range reference with a worksheet and a workbook", () => {
+    const input = new CU.CharStream("'[foobar.xlsx]sheetysheet'!A1:B2");
+    const output = PF.rangeReference(PF.rangeAny)(input);
+    const expected = new AST.ReferenceRange(
+      new AST.Env("", "foobar.xlsx", "sheetysheet"),
+      new AST.Range([
+        [
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PF.EnvStub
+          ),
+          new AST.Address(
+            2,
+            2,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PF.EnvStub
+          ),
+        ],
+      ])
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse this example from Microsoft's documentation", () => {
+    const input = new CU.CharStream(
+      "'C:\\Reports\\[SourceWorkbook.xlsx]Sheet1'!$A$1:$B$2"
+    );
+    const output = PF.rangeReference(PF.rangeAny)(input);
+    const expectedEnv = new AST.Env(
+      "C:\\Reports\\",
+      "SourceWorkbook.xlsx",
+      "Sheet1"
+    );
+    const expected = new AST.ReferenceRange(
+      expectedEnv,
+      new AST.Range([
+        [
+          new AST.Address(
+            1,
+            1,
+            AST.AbsoluteAddress,
+            AST.AbsoluteAddress,
+            expectedEnv
+          ),
+          new AST.Address(
+            2,
+            2,
+            AST.AbsoluteAddress,
+            AST.AbsoluteAddress,
+            expectedEnv
           ),
         ],
       ])

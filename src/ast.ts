@@ -82,6 +82,21 @@ export module AST {
     public toString(): string {
       return "(" + this.column.toString() + "," + this.row.toString() + ")";
     }
+
+    /**
+     * Returns a copy of this Address but with an updated Env.
+     * @param env An Env object.
+     * @returns An Address.
+     */
+    public copyWithNewEnv(env: Env) {
+      return new Address(
+        this.row,
+        this.column,
+        this.rowMode,
+        this.colMode,
+        env
+      );
+    }
   }
 
   export class Range {
@@ -106,44 +121,81 @@ export module AST {
     public get isContiguous(): boolean {
       return this.regions.length === 1;
     }
+
+    /**
+     * Returns a copy of this Range but with an updated Env.
+     * @param env An Env object.
+     * @returns A Range.
+     */
+    public copyWithNewEnv(env: Env): Range {
+      return new Range(
+        this.regions.map(([tl, br]) => [
+          tl.copyWithNewEnv(env),
+          br.copyWithNewEnv(env),
+        ])
+      );
+    }
+
+    public toString(): string {
+      const sregs = this.regions.map(
+        ([tl, br]) => tl.toString() + ":" + br.toString()
+      );
+      return "List(" + sregs.join(",") + ")";
+    }
   }
 
-  export interface ReferenceExpr {
+  export abstract class ReferenceExpr {
     path: string;
     workbookName: string;
     worksheetName: string;
-    toString(): string;
+    abstract toString(): string;
+
+    constructor(env: Env) {
+      this.path = env.path;
+      this.workbookName = env.workbookName;
+      this.worksheetName = env.worksheetName;
+    }
   }
 
-  export class ReferenceAddress implements ReferenceExpr {
-    public env: Env;
-    public address: Address;
+  export class ReferenceRange extends ReferenceExpr {
+    public readonly rng: Range;
+
+    constructor(env: Env, r: Range) {
+      super(env);
+      this.rng = r.copyWithNewEnv(env);
+    }
+
+    public toString(): string {
+      return (
+        "ReferenceRange(" +
+        this.path +
+        ",[" +
+        this.workbookName +
+        "]," +
+        this.worksheetName +
+        "," +
+        this.rng.toString() +
+        ")"
+      );
+    }
+  }
+
+  export class ReferenceAddress extends ReferenceExpr {
+    public readonly address: Address;
 
     constructor(env: Env, address: Address) {
-      this.env = env;
+      super(env);
       this.address = address;
-    }
-
-    public get path(): string {
-      return this.env.path;
-    }
-
-    public get workbookName(): string {
-      return this.env.workbookName;
-    }
-
-    public get worksheetName(): string {
-      return this.env.worksheetName;
     }
 
     public toString(): string {
       return (
         "ReferenceAddress(" +
-        this.env.path +
+        this.path +
         ",[" +
-        this.env.workbookName +
+        this.workbookName +
         "]," +
-        this.env.worksheetName +
+        this.worksheetName +
         "," +
         this.address.toString() +
         ")"

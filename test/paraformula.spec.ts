@@ -1019,3 +1019,44 @@ describe("namedReference", () => {
     }
   });
 });
+
+describe("constant", () => {
+  it("should parse a float", () => {
+    const input = new CU.CharStream("1.234");
+    const output = PRF.constant(input);
+    const expected = new AST.Constant(PP.EnvStub, 1.234);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse an integer", () => {
+    const input = new CU.CharStream("1");
+    const output = PRF.constant(input);
+    const expected = new AST.Constant(PP.EnvStub, 1);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse a number ending with a % sign", () => {
+    const input = new CU.CharStream("123%");
+    const output = PRF.constant(input);
+    const expected = new AST.Constant(PP.EnvStub, 1.23);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});

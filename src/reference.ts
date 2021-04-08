@@ -262,4 +262,19 @@ export module ParaformulaReference {
   >(namedReferenceFirstChar)(namedReferenceLastChars)(
     (c, s) => new AST.ReferenceNamed(PP.EnvStub, c.toString() + s.toString())
   );
+
+  /**
+   * Parses a constant.
+   */
+  export const constant = P.choice(
+    // if the number ends with a % sign
+    P.pipe<number, AST.Constant>(
+      P.left<number, CU.CharStream>(P.float)(P.char("%"))
+    )((n) => new AST.Constant(PP.EnvStub, n / 100))
+  )(
+    // an ordinary number
+    P.pipe<number, AST.Constant>(P.float)(
+      (n) => new AST.Constant(PP.EnvStub, n)
+    )
+  );
 }

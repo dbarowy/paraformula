@@ -215,4 +215,17 @@ export module AST {
       return "ReferenceName(" + this.varName + ")";
     }
   }
+
+  export class Constant extends ReferenceExpr {
+    public readonly value: number;
+
+    constructor(env: Env, value: number) {
+      super(env);
+      this.value = value;
+    }
+
+    public toString(): string {
+      return "Constant(" + this.value + ")";
+    }
+  }
 }

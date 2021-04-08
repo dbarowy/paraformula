@@ -1,6 +1,6 @@
 import { AST } from "./ast";
 import { Primitives as P, CharUtil as CU } from "parsecco";
-import { ParaformulaAddress as PA } from "./address";
+import { Address as PA } from "./address";
 
 export module Paraformula {
   /**

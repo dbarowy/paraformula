@@ -1,9 +1,10 @@
 import { CharUtil as CU } from "parsecco";
-import { Paraformula as PF } from "../src/paraformula";
-import { ParaformulaPrimitives as PP } from "../src/primitives";
-import { ParaformulaAddress as PA } from "../src/address";
-import { ParaformulaRange as PR } from "../src/range";
-import { ParaformulaReference as PRF } from "../src/reference";
+import { Primitives as PP } from "../src/primitives";
+import { Address as PA } from "../src/address";
+import { Range as PR } from "../src/range";
+import { Reference as PRF } from "../src/reference";
+import { ReservedWords as RW } from "../src/reserved_words";
+import { Util } from "../src/util";
 
 import { AST } from "../src/ast";
 import { assert, Assertion, expect } from "chai";
@@ -1106,3 +1107,42 @@ describe("booleanLiteral", () => {
     }
   });
 });
+
+describe("strAlternatives", () => {
+  it("should succeed on something", () => {
+    const input = new CU.CharStream("on");
+    const output = Util.strAlternatives(["on", "off"])(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.toString()).to.equal("on");
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
+// describe("varArgsFunctionName", () => {
+//   it("should succeed on SUM", () => {
+//     const input = new CU.CharStream("SUM");
+//     const output = RW.varArgsFunctionName(input);
+//     switch (output.tag) {
+//       case "success":
+//         expect(output.result.toString()).to.equal("SUM");
+//       case "failure":
+//         assert.fail();
+//     }
+//   });
+// });
+
+// describe("reservedWord", () => {
+//   it("should fail if it encounters a reserved word", () => {
+//     const input = new CU.CharStream("SUM");
+//     const output = RW.reservedWord(input);
+//     switch (output.tag) {
+//       case "success":
+//         assert.fail();
+//       case "failure":
+//         assert(true);
+//     }
+//   });
+// });

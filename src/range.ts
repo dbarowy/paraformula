@@ -1,9 +1,9 @@
 import { AST } from "./ast";
 import { Primitives as P, CharUtil as CU } from "parsecco";
-import { ParaformulaPrimitives as PP } from "./primitives";
-import { ParaformulaAddress as PA } from "./address";
+import { Primitives as PP } from "./primitives";
+import { Address as PA } from "./address";
 
-export module ParaformulaRange {
+export module Range {
   /**
    * Parses an A1 range suffix.
    */

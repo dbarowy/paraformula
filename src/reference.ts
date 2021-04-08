@@ -1,9 +1,9 @@
 import { AST } from "./ast";
 import { Primitives as P, CharUtil as CU } from "parsecco";
-import { ParaformulaPrimitives as PP } from "./primitives";
-import { ParaformulaAddress as PA } from "./address";
+import { Primitives as PP } from "./primitives";
+import { Address as PA } from "./address";
 
-export module ParaformulaReference {
+export module Reference {
   /**
    * Parses a quoted worksheet name.
    */
@@ -295,4 +295,6 @@ export module ParaformulaReference {
   export const booleanLiteral = P.pipe(P.choice(P.str("TRUE"))(P.str("FALSE")))(
     (b) => new AST.Boolean(PP.EnvStub, b.toString().toLowerCase() === "true")
   );
+
+  //   export const value
 }

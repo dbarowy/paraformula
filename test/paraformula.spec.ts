@@ -1024,7 +1024,7 @@ describe("constant", () => {
   it("should parse a float", () => {
     const input = new CU.CharStream("1.234");
     const output = PRF.constant(input);
-    const expected = new AST.Constant(PP.EnvStub, 1.234);
+    const expected = new AST.Number(PP.EnvStub, 1.234);
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1037,7 +1037,7 @@ describe("constant", () => {
   it("should parse an integer", () => {
     const input = new CU.CharStream("1");
     const output = PRF.constant(input);
-    const expected = new AST.Constant(PP.EnvStub, 1);
+    const expected = new AST.Number(PP.EnvStub, 1);
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1050,7 +1050,7 @@ describe("constant", () => {
   it("should parse a number ending with a % sign", () => {
     const input = new CU.CharStream("123%");
     const output = PRF.constant(input);
-    const expected = new AST.Constant(PP.EnvStub, 1.23);
+    const expected = new AST.Number(PP.EnvStub, 1.23);
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1069,6 +1069,34 @@ describe("stringLiteral", () => {
       PP.EnvStub,
       "Half shark alligator half man"
     );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
+describe("booleanLiteral", () => {
+  it("should parse TRUE", () => {
+    const input = new CU.CharStream("TRUE");
+    const output = PRF.booleanLiteral(input);
+    const expected = new AST.Boolean(PP.EnvStub, true);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse FALSE", () => {
+    const input = new CU.CharStream("FALSE");
+    const output = PRF.booleanLiteral(input);
+    const expected = new AST.Boolean(PP.EnvStub, false);
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);

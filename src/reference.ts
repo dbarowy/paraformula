@@ -268,14 +268,12 @@ export module ParaformulaReference {
    */
   export const constant = P.choice(
     // if the number ends with a % sign
-    P.pipe<number, AST.Constant>(
+    P.pipe<number, AST.Number>(
       P.left<number, CU.CharStream>(P.float)(P.char("%"))
-    )((n) => new AST.Constant(PP.EnvStub, n / 100))
+    )((n) => new AST.Number(PP.EnvStub, n / 100))
   )(
     // an ordinary number
-    P.pipe<number, AST.Constant>(P.float)(
-      (n) => new AST.Constant(PP.EnvStub, n)
-    )
+    P.pipe<number, AST.Number>(P.float)((n) => new AST.Number(PP.EnvStub, n))
   );
 
   /**
@@ -290,4 +288,11 @@ export module ParaformulaReference {
       )
     )
   )((s) => new AST.StringLiteral(PP.EnvStub, s.toString()));
+
+  /**
+   * Parses a boolean literal.
+   */
+  export const booleanLiteral = P.pipe(P.choice(P.str("TRUE"))(P.str("FALSE")))(
+    (b) => new AST.Boolean(PP.EnvStub, b.toString().toLowerCase() === "true")
+  );
 }

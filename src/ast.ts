@@ -216,7 +216,7 @@ export module AST {
     }
   }
 
-  export class Constant extends ReferenceExpr {
+  export class Number extends ReferenceExpr {
     public readonly value: number;
 
     constructor(env: Env, value: number) {
@@ -225,7 +225,7 @@ export module AST {
     }
 
     public toString(): string {
-      return "Constant(" + this.value + ")";
+      return "Number(" + this.value + ")";
     }
   }
 
@@ -238,7 +238,20 @@ export module AST {
     }
 
     public toString(): string {
-      return "StringLiteral(" + this.value + ")";
+      return "String(" + this.value + ")";
+    }
+  }
+
+  export class Boolean extends ReferenceExpr {
+    public readonly value: boolean;
+
+    constructor(env: Env, value: boolean) {
+      super(env);
+      this.value = value;
+    }
+
+    public toString(): string {
+      return "Boolean(" + this.value + ")";
     }
   }
 }

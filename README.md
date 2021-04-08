@@ -1,4 +1,4 @@
-# excello
+# paraformula
 
 An Excel formula language parser, written in Typescript
 

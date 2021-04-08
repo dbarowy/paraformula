@@ -231,4 +231,35 @@ export module ParaformulaReference {
     addressReferenceWorksheet,
     addressReferenceBare
   );
+
+  /**
+   * Parses a named reference prefix.
+   */
+  export const namedReferenceFirstChar = P.choice(P.sat((ch) => ch === "_"))(
+    P.letter
+  );
+
+  /**
+   * Parses a named reference suffix.
+   */
+  export const namedReferenceLastChars = P.pipe<CU.CharStream[], CU.CharStream>(
+    P.many1(
+      P.choices(
+        P.sat((ch) => ch === "_"),
+        P.letter,
+        P.digit
+      )
+    )
+  )(CU.CharStream.concat);
+
+  /**
+   * Parses a named reference.
+   */
+  export const namedReference = P.pipe2<
+    CU.CharStream,
+    CU.CharStream,
+    AST.ReferenceNamed
+  >(namedReferenceFirstChar)(namedReferenceLastChars)(
+    (c, s) => new AST.ReferenceNamed(PP.EnvStub, c.toString() + s.toString())
+  );
 }

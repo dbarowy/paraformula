@@ -202,4 +202,17 @@ export module AST {
       );
     }
   }
+
+  export class ReferenceNamed extends ReferenceExpr {
+    public readonly varName: string;
+
+    constructor(env: Env, varName: string) {
+      super(env);
+      this.varName = varName;
+    }
+
+    public toString(): string {
+      return "ReferenceName(" + this.varName + ")";
+    }
+  }
 }

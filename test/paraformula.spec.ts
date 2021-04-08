@@ -1004,3 +1004,18 @@ describe("addressReference", () => {
     }
   });
 });
+
+describe("namedReference", () => {
+  it("should parse a named reference", () => {
+    const input = new CU.CharStream("My_Great_Ref8");
+    const output = PRF.namedReference(input);
+    const expected = new AST.ReferenceNamed(PP.EnvStub, "My_Great_Ref8");
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});

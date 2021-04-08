@@ -1115,34 +1115,36 @@ describe("strAlternatives", () => {
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("on");
+        break;
       case "failure":
         assert.fail();
     }
   });
 });
 
-// describe("varArgsFunctionName", () => {
-//   it("should succeed on SUM", () => {
-//     const input = new CU.CharStream("SUM");
-//     const output = RW.varArgsFunctionName(input);
-//     switch (output.tag) {
-//       case "success":
-//         expect(output.result.toString()).to.equal("SUM");
-//       case "failure":
-//         assert.fail();
-//     }
-//   });
-// });
+describe("varArgsFunctionName", () => {
+  it("should succeed on SUM", () => {
+    const input = new CU.CharStream("SUM");
+    const output = RW.varArgsFunctionName(input);
+    switch (output.tag) {
+      case "success":
+        expect(output.result.toString()).to.equal("SUM");
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
 
-// describe("reservedWord", () => {
-//   it("should fail if it encounters a reserved word", () => {
-//     const input = new CU.CharStream("SUM");
-//     const output = RW.reservedWord(input);
-//     switch (output.tag) {
-//       case "success":
-//         assert.fail();
-//       case "failure":
-//         assert(true);
-//     }
-//   });
-// });
+describe("reservedWord", () => {
+  it("should fail if it encounters a reserved word", () => {
+    const input = new CU.CharStream("SUM");
+    const output = RW.reservedWord(input);
+    switch (output.tag) {
+      case "success":
+        assert.fail();
+      case "failure":
+        assert(true);
+    }
+  });
+});

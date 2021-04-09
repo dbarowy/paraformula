@@ -1,5 +1,7 @@
 import { Primitives as P, CharUtil as CU } from "parsecco";
+import { AST } from "./ast";
 import { Util } from "./util";
+import { Primitives as PP } from "./primitives";
 
 export module ReservedWords {
   const Arity0Names: string[] = [
@@ -957,22 +959,27 @@ export module ReservedWords {
    * Fails if any reserved word is encountered, succeeds otherwise.
    * Never consumes input.
    */
-  export const reservedWord = P.fail(
-    P.choices(
-      arity0FunctionName,
-      arity1FunctionName,
-      arity2FunctionName,
-      arity3FunctionName,
-      arity4FunctionName,
-      arity5FunctionName,
-      arity6FunctionName,
-      arity7FunctionName,
-      arity8FunctionName,
-      arity9FunctionName,
-      arityAtLeast1FunctionName,
-      arityAtLeast2FunctionName,
-      arityAtLeast3FunctionName,
-      varArgsFunctionName
-    )
-  )("Cannot parse a reserved word.");
+  export const reservedWord: P.IParser<AST.ReferenceExpr> = P.fail(
+    // the poison pill generic type parameter
+    // is purely so that this parser returns
+    // a type that is a "reference".
+    P.pipe<CU.CharStream, AST.PoisonPill>(
+      P.choices(
+        arity0FunctionName,
+        arity1FunctionName,
+        arity2FunctionName,
+        arity3FunctionName,
+        arity4FunctionName,
+        arity5FunctionName,
+        arity6FunctionName,
+        arity7FunctionName,
+        arity8FunctionName,
+        arity9FunctionName,
+        arityAtLeast1FunctionName,
+        arityAtLeast2FunctionName,
+        arityAtLeast3FunctionName,
+        varArgsFunctionName
+      )
+    )((cs) => new AST.PoisonPill(PP.EnvStub))
+  )("Cannot parse a reserved word.") as P.IParser<AST.ReferenceExpr>;
 }

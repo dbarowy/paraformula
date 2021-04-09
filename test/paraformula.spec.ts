@@ -746,7 +746,7 @@ describe("rangePrefixQuoted", () => {
 describe("rangeReference", () => {
   it("should parse a bare range reference", () => {
     const input = new CU.CharStream("A1:B2");
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = PRF.rangeReference(input);
     const expected = new AST.ReferenceRange(
       PP.EnvStub,
       new AST.Range([
@@ -779,7 +779,7 @@ describe("rangeReference", () => {
 
   it("should parse a range reference with only a worksheet", () => {
     const input = new CU.CharStream("sheetysheet!A1:B2");
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = PRF.rangeReference(input);
     const expected = new AST.ReferenceRange(
       new AST.Env("", "", "sheetysheet"),
       new AST.Range([
@@ -812,7 +812,7 @@ describe("rangeReference", () => {
 
   it("should parse a range reference with a worksheet and a workbook", () => {
     const input = new CU.CharStream("'[foobar.xlsx]sheetysheet'!A1:B2");
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = PRF.rangeReference(input);
     const expected = new AST.ReferenceRange(
       new AST.Env("", "foobar.xlsx", "sheetysheet"),
       new AST.Range([
@@ -847,7 +847,7 @@ describe("rangeReference", () => {
     const input = new CU.CharStream(
       "'C:\\Reports\\[SourceWorkbook.xlsx]Sheet1'!$A$1:$B$2"
     );
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = PRF.rangeReference(input);
     const expectedEnv = new AST.Env(
       "C:\\Reports\\",
       "SourceWorkbook.xlsx",

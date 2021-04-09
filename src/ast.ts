@@ -145,6 +145,7 @@ export module AST {
   }
 
   export abstract class ReferenceExpr {
+    tag: "ReferenceExpr" = "ReferenceExpr";
     path: string;
     workbookName: string;
     worksheetName: string;
@@ -154,6 +155,10 @@ export module AST {
       this.path = env.path;
       this.workbookName = env.workbookName;
       this.worksheetName = env.worksheetName;
+    }
+
+    public get toFormula(): string {
+      throw new Error("not implemented");
     }
   }
 
@@ -216,6 +221,44 @@ export module AST {
     }
   }
 
+  class FixedArity {
+    public num: number;
+    constructor(num: number) {
+      this.num = num;
+    }
+  }
+
+  class LowBoundArity {
+    public num: number;
+    constructor(num: number) {
+      this.num = num;
+    }
+  }
+
+  class VarArgsArity {}
+  const VarArgs = new VarArgsArity();
+
+  type Arity = FixedArity | LowBoundArity | VarArgsArity;
+
+  export class ReferenceFunction extends ReferenceExpr {
+    public readonly name: string;
+    public readonly args: Expression[];
+    public readonly arity: Arity;
+
+    constructor(env: Env, name: string, args: Expression[], arity: Arity) {
+      super(env);
+      this.name = name;
+      this.args = args;
+      this.arity = arity;
+    }
+
+    public toString(): string {
+      return (
+        this.name + "(" + this.args.map((arg) => arg.toFormula).join(",") + ")"
+      );
+    }
+  }
+
   export class Number extends ReferenceExpr {
     public readonly value: number;
 
@@ -254,4 +297,78 @@ export module AST {
       return "Boolean(" + this.value + ")";
     }
   }
+
+  // this should only ever be instantiated by
+  // the reserved words class, which is designed
+  // to fail
+  export class PoisonPill extends ReferenceExpr {
+    constructor(env: Env) {
+      super(env);
+    }
+
+    public toString(): string {
+      return "PoisonPill";
+    }
+  }
+
+  export class ParensExpr {
+    tag: "ParensExpr" = "ParensExpr";
+    public expr: Expression;
+
+    constructor(expr: Expression) {
+      this.expr = expr;
+    }
+
+    public get toFormula(): string {
+      return "(" + this.expr.toFormula + ")";
+    }
+  }
+
+  export class BinOpExpression {
+    tag: "BinOpExpression" = "BinOpExpression";
+    public op: string;
+    public exprL: Expression;
+    public exprR: Expression;
+
+    constructor(op: string, exprL: Expression, exprR: Expression) {
+      this.op = op;
+      this.exprR = exprR;
+      this.exprL = exprL;
+    }
+
+    public get toFormula(): string {
+      return (
+        "BinOpExpr(" +
+        this.op.toString() +
+        "," +
+        this.exprL.toFormula +
+        "," +
+        this.exprR.toFormula +
+        ")"
+      );
+    }
+  }
+
+  export class UnaryOpExpression {
+    tag: "UnaryOpExpression" = "UnaryOpExpression";
+    public op: string;
+    public expr: Expression;
+
+    constructor(op: string, expr: Expression) {
+      this.op = op;
+      this.expr = expr;
+    }
+
+    public get toFormula(): string {
+      return (
+        "UnaryOpExpr(" + this.op.toString() + "," + this.expr.toFormula + ")"
+      );
+    }
+  }
+
+  export type Expression =
+    | ReferenceExpr
+    | ParensExpr
+    | BinOpExpression
+    | UnaryOpExpression;
 }

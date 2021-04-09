@@ -955,27 +955,24 @@ export module ReservedWords {
 
   /**
    * Fails if any reserved word is encountered, succeeds otherwise.
+   * Never consumes input.
    */
-  export const reservedWord = P.choice(
-    P.seq(
-      P.choices(
-        arity0FunctionName,
-        arity1FunctionName,
-        arity2FunctionName,
-        arity3FunctionName,
-        arity4FunctionName,
-        arity5FunctionName,
-        arity6FunctionName,
-        arity7FunctionName,
-        arity8FunctionName,
-        arity9FunctionName,
-        arityAtLeast1FunctionName,
-        arityAtLeast2FunctionName,
-        arityAtLeast3FunctionName,
-        varArgsFunctionName
-      )
-    )(P.zero("Reserved word."))((s) => {
-      throw new Error("Never happens.");
-    })
-  )(P.str(""));
+  export const reservedWord = P.fail(
+    P.choices(
+      arity0FunctionName,
+      arity1FunctionName,
+      arity2FunctionName,
+      arity3FunctionName,
+      arity4FunctionName,
+      arity5FunctionName,
+      arity6FunctionName,
+      arity7FunctionName,
+      arity8FunctionName,
+      arity9FunctionName,
+      arityAtLeast1FunctionName,
+      arityAtLeast2FunctionName,
+      arityAtLeast3FunctionName,
+      varArgsFunctionName
+    )
+  )("Cannot parse a reserved word.");
 }

@@ -61,9 +61,17 @@ export module Range {
   );
 
   /**
+   * Parses a contiguous range.
+   */
+  export const rangeContig = P.choice(rangeR1C1Contig)(rangeA1Contig);
+
+  /**
+   * Parses a discontiguous range.
+   */
+  export const rangeDiscontig = P.choice(rangeR1C1Discontig)(rangeA1Discontig);
+
+  /**
    * Parses any range, A1-style or R1C1-style, contiguous or discontiguous.
    */
-  export const rangeAny = P.choice(
-    P.choice(rangeR1C1Discontig)(rangeR1C1Contig)
-  )(P.choice(rangeA1Discontig)(rangeA1Contig));
+  export const rangeAny = P.choice(rangeContig)(rangeDiscontig);
 }

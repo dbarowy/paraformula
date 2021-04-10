@@ -221,24 +221,24 @@ export module AST {
     }
   }
 
-  class FixedArity {
+  export class FixedArity {
     public num: number;
     constructor(num: number) {
       this.num = num;
     }
   }
 
-  class LowBoundArity {
+  export class LowBoundArity {
     public num: number;
     constructor(num: number) {
       this.num = num;
     }
   }
 
-  class VarArgsArity {}
-  const VarArgs = new VarArgsArity();
+  class VarArgsArityClz {}
+  export const VarArgsArity = new VarArgsArityClz();
 
-  type Arity = FixedArity | LowBoundArity | VarArgsArity;
+  export type Arity = FixedArity | LowBoundArity | VarArgsArityClz;
 
   export class ReferenceFunction extends ReferenceExpr {
     public readonly name: string;
@@ -307,7 +307,7 @@ export module AST {
     }
 
     public toString(): string {
-      return "PoisonPill";
+      throw new Error("This object should never be instantiated.");
     }
   }
 

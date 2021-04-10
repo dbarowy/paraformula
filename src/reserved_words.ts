@@ -982,4 +982,28 @@ export module ReservedWords {
       )
     )((cs) => new AST.PoisonPill(PP.EnvStub))
   )("Cannot parse a reserved word.") as P.IParser<AST.ReferenceExpr>;
+
+  /**
+   * An array of all fixed-arity function parsers, indexed by arity.
+   */
+  export const arityNNameArray: P.IParser<CU.CharStream>[] = [
+    arity0FunctionName,
+    arity1FunctionName,
+    arity2FunctionName,
+    arity3FunctionName,
+    arity4FunctionName,
+    arity5FunctionName,
+    arity6FunctionName,
+    arity7FunctionName,
+    arity8FunctionName,
+    arity9FunctionName,
+  ];
+
+  /**
+   * Returns a function name parser for all functions of fixed arity n.
+   * @param n Arity.
+   */
+  export function arityNName(n: number): P.IParser<CU.CharStream> {
+    return arityNNameArray[n];
+  }
 }

@@ -73,5 +73,5 @@ export module Range {
   /**
    * Parses any range, A1-style or R1C1-style, contiguous or discontiguous.
    */
-  export const rangeAny = P.choice(rangeContig)(rangeDiscontig);
+  export const rangeAny = P.choice(rangeDiscontig)(rangeContig);
 }

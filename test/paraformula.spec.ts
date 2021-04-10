@@ -3,7 +3,8 @@ import { Primitives as PP } from "../src/primitives";
 import { Address as PA } from "../src/address";
 import { Range as PR } from "../src/range";
 import { Reference as PRF } from "../src/reference";
-import { ReservedWords as RW } from "../src/reserved_words";
+import { ReservedWords as PRW } from "../src/reserved_words";
+import { Expression as PE } from "../src/expression";
 import { Util } from "../src/util";
 
 import { AST } from "../src/ast";
@@ -1125,7 +1126,7 @@ describe("strAlternatives", () => {
 describe("varArgsFunctionName", () => {
   it("should succeed on SUM", () => {
     const input = new CU.CharStream("SUM");
-    const output = RW.varArgsFunctionName(input);
+    const output = PRW.varArgsFunctionName(input);
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("SUM");
@@ -1139,7 +1140,72 @@ describe("varArgsFunctionName", () => {
 describe("reservedWord", () => {
   it("should fail if it encounters a reserved word", () => {
     const input = new CU.CharStream("SUM");
-    const output = RW.reservedWord(input);
+    const output = PRW.reservedWord(input);
+    switch (output.tag) {
+      case "success":
+        assert.fail();
+      case "failure":
+        assert(true);
+    }
+  });
+});
+
+describe("data", () => {
+  it("should parse any reference to numeric data", () => {
+    const input = new CU.CharStream("3");
+    const output = PRF.data(input);
+    const expected = new AST.Number(PP.EnvStub, 3);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse any named reference", () => {
+    const input = new CU.CharStream("Joe");
+    const output = PRF.data(input);
+    const expected = new AST.ReferenceNamed(PP.EnvStub, "Joe");
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse any string literal", () => {
+    const input = new CU.CharStream("\"Joe Biden\"");
+    const output = PRF.data(input);
+    const expected = new AST.StringLiteral(PP.EnvStub, "Joe Biden");
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse any boolean", () => {
+    const input = new CU.CharStream("FALSE");
+    const output = PRF.data(input);
+    const expected = new AST.Boolean(PP.EnvStub, false);
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should fail if it encounters a reserved word", () => {
+    const input = new CU.CharStream("SUMPRODUCT");
+    const output = PRF.data(input);
     switch (output.tag) {
       case "success":
         assert.fail();

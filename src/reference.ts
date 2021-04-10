@@ -303,12 +303,28 @@ export module Reference {
   /**
    * Parses any data.
    */
+  export const data2 = P.choices<AST.ReferenceExpr>(
+    P.debug(addressReference)("addressReference"),
+    P.debug(booleanLiteral)("booleanLiteral"),
+    P.debug(constant)("constant"),
+    P.debug(RW.reservedWord)("reservedWord"),
+    P.debug(stringLiteral)("stringLiteral"),
+    P.debug(namedReference)("namedReference")
+  );
+
   export const data = P.choices<AST.ReferenceExpr>(
     addressReference,
     booleanLiteral,
     constant,
-    RW.reservedWord,
-    stringLiteral,
-    namedReference
-  );
+    // before continuing, ensure that no reserved words
+    // are present; the reservedWord parser is a lookahead parser
+    // that succeeds, consuming no input, when no reserved words
+    // are present at the start of the input stream
+    P.right<AST.ReferenceExpr, AST.ReferenceExpr>(RW.reservedWord)(
+      P.choices(
+        stringLiteral,
+        namedReference
+      )
+    ),
+  )
 }

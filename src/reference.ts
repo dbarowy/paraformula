@@ -303,15 +303,6 @@ export module Reference {
   /**
    * Parses any data.
    */
-  export const data2 = P.choices<AST.ReferenceExpr>(
-    P.debug(addressReference)("addressReference"),
-    P.debug(booleanLiteral)("booleanLiteral"),
-    P.debug(constant)("constant"),
-    P.debug(RW.reservedWord)("reservedWord"),
-    P.debug(stringLiteral)("stringLiteral"),
-    P.debug(namedReference)("namedReference")
-  );
-
   export const data = P.choices<AST.ReferenceExpr>(
     addressReference,
     booleanLiteral,
@@ -326,5 +317,5 @@ export module Reference {
         namedReference
       )
     ),
-  )
+  );
 }

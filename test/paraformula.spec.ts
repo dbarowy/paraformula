@@ -1214,3 +1214,18 @@ describe("data", () => {
     }
   });
 });
+
+describe("argumentsN", () => {
+  it("should parse an argument list", () => {
+    const input = new CU.CharStream("1, TRUE, henry");
+    const output = PE.argumentsN(3)(input);
+    const expected = [new AST.Number(PP.EnvStub, 1), new AST.Boolean(PP.EnvStub, true), new AST.ReferenceNamed(PP.EnvStub, "henry")];
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});

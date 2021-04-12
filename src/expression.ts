@@ -5,7 +5,13 @@ import { Reference as PR } from "./reference";
 import { ReservedWords as PRW } from "./reserved_words";
 
 export module Expression {
-  export let [expr, exprImpl] = P.recParser<AST.Expression>();
+  /**
+   * expr is the top-level parser in the grammar.
+   */
+  export let [expr, exprImpl] = P.rec1ArgParser<
+    P.IParser<AST.Range>,
+    AST.Expression
+  >();
 
   /**
    * Creates an array from 0 to n-1.
@@ -83,89 +89,108 @@ export module Expression {
 
   /**
    * Parses a single function argument expression.
+   * @param R A range parser.
    */
-  export const argument = P.left(expr)(PP.Comma);
+  export function argument(R: P.IParser<AST.Range>) {
+    return P.left<AST.Expression, CU.CharStream>(expr(R))(PP.Comma);
+  }
 
   /**
    * Parses a list of `n` argument expressions.
+   * @param R A range parser.
    * @param n Number of arguments to parse.
    */
-  export function argumentsN(n: number): P.IParser<AST.Expression[]> {
-    return P.pipe2<AST.Expression[], AST.Expression, AST.Expression[]>(
-      seqN(n - 1, argument)
-    )(expr)((as, a) => rev(cons(a, as)));
+  export function argumentsN(R: P.IParser<AST.Range>) {
+    return (n: number) => {
+      return P.pipe2<AST.Expression[], AST.Expression, AST.Expression[]>(
+        seqN(n - 1, argument(R))
+      )(expr(R))((as, a) => rev(cons(a, as)));
+    };
   }
 
   /**
    * Parses a function application of arity n.
+   * @param R Range parser.
    * @param n Arity.
    */
-  export function arityNFunction(n: number): P.IParser<AST.ReferenceFunction> {
-    if (n === 0) {
-      return P.pipe<CU.CharStream, AST.ReferenceFunction>(
-        P.left(PRW.arityNName(0))(P.str("()"))
-      )(
-        (name) =>
-          new AST.ReferenceFunction(
-            PP.EnvStub,
-            name.toString(),
-            [],
-            new AST.FixedArity(0)
-          )
-      );
-    } else {
-      return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
-        // parse the function name
-        P.left<CU.CharStream, CU.CharStream>(PRW.arityNName(n))(P.char("("))
-      )(
-        // parse the arguments
-        P.left<AST.Expression[], CU.CharStream>(argumentsN(n))(P.char(")"))
-      )(
-        (name, es) =>
-          new AST.ReferenceFunction(
-            PP.EnvStub,
-            name.toString(),
-            es,
-            new AST.FixedArity(n)
-          )
-      );
-    }
+  export function arityNFunction(R: P.IParser<AST.Range>) {
+    return (n: number) => {
+      if (n === 0) {
+        return P.pipe<CU.CharStream, AST.ReferenceFunction>(
+          P.left(PRW.arityNName(0))(P.str("()"))
+        )(
+          (name) =>
+            new AST.ReferenceFunction(
+              PP.EnvStub,
+              name.toString(),
+              [],
+              new AST.FixedArity(0)
+            )
+        );
+      } else {
+        return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
+          // parse the function name
+          P.left<CU.CharStream, CU.CharStream>(PRW.arityNName(n))(P.char("("))
+        )(
+          // parse the arguments
+          P.left<AST.Expression[], CU.CharStream>(argumentsN(R)(n))(P.char(")"))
+        )(
+          (name, es) =>
+            new AST.ReferenceFunction(
+              PP.EnvStub,
+              name.toString(),
+              es,
+              new AST.FixedArity(n)
+            )
+        );
+      }
+    };
   }
 
   /**
    * Parses a function of arbitrary arity.
    */
-  export const fApply: P.IParser<AST.ReferenceFunction> = choicesFrom(
-    fillTo(PRW.arityNNameArray.length).map((e, i) => arityNFunction(i))
-  );
+  export function fApply(
+    R: P.IParser<AST.Range>
+  ): P.IParser<AST.ReferenceFunction> {
+    return choicesFrom(
+      fillTo(PRW.arityNNameArray.length).map((e, i) => arityNFunction(R)(i))
+    );
+  }
 
   /**
    * Parses a parenthesized expression.
    * @param R A range parser.
    * @returns
    */
-  export const exprParens = P.between<
-    CU.CharStream,
-    CU.CharStream,
-    AST.ParensExpr
-  >(P.char("("))(P.char(")"))(
-    P.pipe<AST.Expression, AST.ParensExpr>(expr)((e) => new AST.ParensExpr(e))
-  );
+  export function exprParens(R: P.IParser<AST.Range>) {
+    return P.between<CU.CharStream, CU.CharStream, AST.ParensExpr>(P.char("("))(
+      P.char(")")
+    )(
+      P.pipe<AST.Expression, AST.ParensExpr>(expr(R))(
+        (e) => new AST.ParensExpr(e)
+      )
+    );
+  }
 
   /**
    * Parses either functions or data.
    */
-  export const exprAtom = P.choice<AST.ReferenceExpr>(fApply)(PR.data);
+  export function exprAtom(R: P.IParser<AST.Range>) {
+    return P.choice<AST.ReferenceExpr>(fApply(R))(PR.data);
+  }
 
   /**
    * Parses a simple expression.
    * @param R A range parser.
    */
-  export const exprSimple = P.choice<AST.Expression>(exprAtom)(exprParens);
+  export function exprSimple(R: P.IParser<AST.Range>) {
+    return P.choice<AST.Expression>(exprAtom(R))(exprParens(R));
+  }
 
   /**
    * Parses an arbitrarily complex expression.
    * @param R A range parser.
    */
-  exprImpl.contents = exprSimple;
+  exprImpl.contents = (R: P.IParser<AST.Range>) => exprSimple(R);
 }

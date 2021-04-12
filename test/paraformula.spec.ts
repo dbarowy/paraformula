@@ -1218,7 +1218,7 @@ describe("data", () => {
 describe("argumentsN", () => {
   it("should parse an argument list", () => {
     const input = new CU.CharStream("1, TRUE, henry");
-    const output = PE.argumentsN(3)(input);
+    const output = PE.argumentsN(PR.rangeAny)(3)(input);
     const expected = [
       new AST.Number(PP.EnvStub, 1),
       new AST.Boolean(PP.EnvStub, true),
@@ -1237,7 +1237,7 @@ describe("argumentsN", () => {
 describe("arityNFunction", () => {
   it("should parse a zero-arity function application like RAND()", () => {
     const input = new CU.CharStream("RAND()");
-    const output = PE.arityNFunction(0)(input);
+    const output = PE.arityNFunction(PR.rangeAny)(0)(input);
     const expected = new AST.ReferenceFunction(
       PP.EnvStub,
       "RAND",
@@ -1255,7 +1255,7 @@ describe("arityNFunction", () => {
 
   it("should parse a more-than-zero-arity function application like CEILING()", () => {
     const input = new CU.CharStream("CEILING(A1,5)");
-    const output = PE.arityNFunction(2)(input);
+    const output = PE.arityNFunction(PR.rangeAny)(2)(input);
     const expected = new AST.ReferenceFunction(
       PP.EnvStub,
       "CEILING",
@@ -1287,7 +1287,7 @@ describe("arityNFunction", () => {
 describe("fApply", () => {
   it("should parse a fixed arity function application like CEILING()", () => {
     const input = new CU.CharStream("CEILING(A1,5)");
-    const output = PE.arityNFunction(2)(input);
+    const output = PE.arityNFunction(PR.rangeAny)(2)(input);
     const expected = new AST.ReferenceFunction(
       PP.EnvStub,
       "CEILING",

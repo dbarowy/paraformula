@@ -97,71 +97,75 @@ export module Reference {
    * includes a path, includes a workbook, and includes a worksheet.
    * @param R A range parser.
    */
-  export const rangeReferenceWorkbook = P.pipe2<
-    [[CU.CharStream, CU.CharStream], CU.CharStream],
-    AST.Range,
-    AST.ReferenceRange
-  >(
-    // first parse the path-wb-ws string
-    P.left<[[CU.CharStream, CU.CharStream], CU.CharStream], CU.CharStream>(
-      quotedPrefix
-    )(P.char("!"))
-  )(
-    // then parse the range itself
-    PR.rangeAny
-  )(
-    // then stick them together and return a RangeReference object
-    ([[p, wb], ws], r) =>
-      new AST.ReferenceRange(
-        new AST.Env(p.toString(), wb.toString(), ws.toString()),
-        r
-      )
-  );
+  export function rangeReferenceWorkbook(R: P.IParser<AST.Range>) {
+    return P.pipe2<
+      [[CU.CharStream, CU.CharStream], CU.CharStream],
+      AST.Range,
+      AST.ReferenceRange
+    >(
+      // first parse the path-wb-ws string
+      P.left<[[CU.CharStream, CU.CharStream], CU.CharStream], CU.CharStream>(
+        quotedPrefix
+      )(P.char("!"))
+    )(
+      // then parse the range itself
+      R
+    )(
+      // then stick them together and return a RangeReference object
+      ([[p, wb], ws], r) =>
+        new AST.ReferenceRange(
+          new AST.Env(p.toString(), wb.toString(), ws.toString()),
+          r
+        )
+    );
+  }
 
   /**
    * Parses a range reference that only includes a worksheet.
    * @param R A range parser.
    */
-  export const rangeReferenceWorksheet = P.pipe2<
-    CU.CharStream,
-    AST.Range,
-    AST.ReferenceRange
-  >(
-    // first parse the path-wb-ws string
-    P.left<CU.CharStream, CU.CharStream>(worksheetName)(P.char("!"))
-  )(
-    // then parse the range itself
-    PR.rangeAny
-  )(
-    // then stick them together and return a RangeReference object
-    (ws, r) =>
-      new AST.ReferenceRange(
-        new AST.Env(PP.EnvStub.path, PP.EnvStub.workbookName, ws.toString()),
-        r
-      )
-  );
+  export function rangeReferenceWorksheet(R: P.IParser<AST.Range>) {
+    return P.pipe2<CU.CharStream, AST.Range, AST.ReferenceRange>(
+      // first parse the path-wb-ws string
+      P.left<CU.CharStream, CU.CharStream>(worksheetName)(P.char("!"))
+    )(
+      // then parse the range itself
+      R
+    )(
+      // then stick them together and return a RangeReference object
+      (ws, r) =>
+        new AST.ReferenceRange(
+          new AST.Env(PP.EnvStub.path, PP.EnvStub.workbookName, ws.toString()),
+          r
+        )
+    );
+  }
 
   /**
    * Parses a bare range reference.
    * @param R A range parser.
    */
-  export const rangeReferenceBare = P.pipe<AST.Range, AST.ReferenceRange>(
-    // parse the range itself
-    PR.rangeAny
-  )(
-    // then return a RangeReference object
-    (r) => new AST.ReferenceRange(PP.EnvStub, r)
-  );
+  export function rangeReferenceBare(R: P.IParser<AST.Range>) {
+    return P.pipe<AST.Range, AST.ReferenceRange>(
+      // parse the range itself
+      R
+    )(
+      // then return a RangeReference object
+      (r) => new AST.ReferenceRange(PP.EnvStub, r)
+    );
+  }
 
   /**
    * Parses any range reference.
    * @param R A range parser.
    */
-  export const rangeReference = P.choices(
-    rangeReferenceWorkbook,
-    rangeReferenceWorksheet,
-    rangeReferenceBare
-  );
+  export function rangeReference(R: P.IParser<AST.Range>) {
+    return P.choices(
+      rangeReferenceWorkbook(R),
+      rangeReferenceWorksheet(R),
+      rangeReferenceBare(R)
+    );
+  }
 
   /**
    * Parses a fully-qualified address reference, i.e., an address that (optionally)
@@ -312,10 +316,7 @@ export module Reference {
     // that succeeds, consuming no input, when no reserved words
     // are present at the start of the input stream
     P.right<AST.ReferenceExpr, AST.ReferenceExpr>(RW.reservedWord)(
-      P.choices(
-        stringLiteral,
-        namedReference
-      )
-    ),
+      P.choices(stringLiteral, namedReference)
+    )
   );
 }

@@ -1000,6 +1000,16 @@ export module ReservedWords {
   ];
 
   /**
+   * An array of all "at least"-arity function parsers, indexed by minimum arity.
+   */
+  export const arityAtLeastNNameArray: P.IParser<CU.CharStream>[] = [
+    // NOTE: "ArityAtLeast0" is just VarArgs
+    arityAtLeast1FunctionName,
+    arityAtLeast2FunctionName,
+    arityAtLeast3FunctionName,
+  ];
+
+  /**
    * Returns a function name parser for all functions of fixed arity n.
    * @param n Arity.
    */

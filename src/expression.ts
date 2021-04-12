@@ -63,7 +63,7 @@ export module Expression {
    */
   function rev<T>(arr: T[]): T[] {
     const arr2 = arr.slice();
-    arr2.reverse()
+    arr2.reverse();
     return arr2;
   }
 

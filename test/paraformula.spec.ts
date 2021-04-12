@@ -747,7 +747,7 @@ describe("rangePrefixQuoted", () => {
 describe("rangeReference", () => {
   it("should parse a bare range reference", () => {
     const input = new CU.CharStream("A1:B2");
-    const output = PRF.rangeReference(input);
+    const output = PRF.rangeReference(PR.rangeAny)(input);
     const expected = new AST.ReferenceRange(
       PP.EnvStub,
       new AST.Range([
@@ -780,7 +780,7 @@ describe("rangeReference", () => {
 
   it("should parse a range reference with only a worksheet", () => {
     const input = new CU.CharStream("sheetysheet!A1:B2");
-    const output = PRF.rangeReference(input);
+    const output = PRF.rangeReference(PR.rangeAny)(input);
     const expected = new AST.ReferenceRange(
       new AST.Env("", "", "sheetysheet"),
       new AST.Range([
@@ -813,7 +813,7 @@ describe("rangeReference", () => {
 
   it("should parse a range reference with a worksheet and a workbook", () => {
     const input = new CU.CharStream("'[foobar.xlsx]sheetysheet'!A1:B2");
-    const output = PRF.rangeReference(input);
+    const output = PRF.rangeReference(PR.rangeAny)(input);
     const expected = new AST.ReferenceRange(
       new AST.Env("", "foobar.xlsx", "sheetysheet"),
       new AST.Range([
@@ -848,7 +848,7 @@ describe("rangeReference", () => {
     const input = new CU.CharStream(
       "'C:\\Reports\\[SourceWorkbook.xlsx]Sheet1'!$A$1:$B$2"
     );
-    const output = PRF.rangeReference(input);
+    const output = PRF.rangeReference(PR.rangeAny)(input);
     const expectedEnv = new AST.Env(
       "C:\\Reports\\",
       "SourceWorkbook.xlsx",
@@ -1178,7 +1178,7 @@ describe("data", () => {
   });
 
   it("should parse any string literal", () => {
-    const input = new CU.CharStream("\"Joe Biden\"");
+    const input = new CU.CharStream('"Joe Biden"');
     const output = PRF.data(input);
     const expected = new AST.StringLiteral(PP.EnvStub, "Joe Biden");
     switch (output.tag) {
@@ -1219,7 +1219,11 @@ describe("argumentsN", () => {
   it("should parse an argument list", () => {
     const input = new CU.CharStream("1, TRUE, henry");
     const output = PE.argumentsN(3)(input);
-    const expected = [new AST.Number(PP.EnvStub, 1), new AST.Boolean(PP.EnvStub, true), new AST.ReferenceNamed(PP.EnvStub, "henry")];
+    const expected = [
+      new AST.Number(PP.EnvStub, 1),
+      new AST.Boolean(PP.EnvStub, true),
+      new AST.ReferenceNamed(PP.EnvStub, "henry"),
+    ];
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1229,3 +1233,136 @@ describe("argumentsN", () => {
     }
   });
 });
+
+describe("arityNFunction", () => {
+  it("should parse a zero-arity function application like RAND()", () => {
+    const input = new CU.CharStream("RAND()");
+    const output = PE.arityNFunction(0)(input);
+    const expected = new AST.ReferenceFunction(
+      PP.EnvStub,
+      "RAND",
+      [],
+      new AST.FixedArity(0)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+
+  it("should parse a more-than-zero-arity function application like CEILING()", () => {
+    const input = new CU.CharStream("CEILING(A1,5)");
+    const output = PE.arityNFunction(2)(input);
+    const expected = new AST.ReferenceFunction(
+      PP.EnvStub,
+      "CEILING",
+      [
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        ),
+        new AST.Number(PP.EnvStub, 5),
+      ],
+      new AST.FixedArity(2)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
+describe("fApply", () => {
+  it("should parse a fixed arity function application like CEILING()", () => {
+    const input = new CU.CharStream("CEILING(A1,5)");
+    const output = PE.arityNFunction(2)(input);
+    const expected = new AST.ReferenceFunction(
+      PP.EnvStub,
+      "CEILING",
+      [
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        ),
+        new AST.Number(PP.EnvStub, 5),
+      ],
+      new AST.FixedArity(2)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
+// it("should parse a varargs function application like SUM()", () => {
+//   const input = new CU.CharStream("SUM(A1,B2:B77,5)");
+//   const output = PE.arityNFunction(2)(input);
+//   const expected = new AST.ReferenceFunction(
+//     PP.EnvStub,
+//     "SUM",
+//     [
+//       new AST.ReferenceAddress(
+//         PP.EnvStub,
+//         new AST.Address(
+//           1,
+//           1,
+//           AST.RelativeAddress,
+//           AST.RelativeAddress,
+//           PP.EnvStub
+//         )
+//       ),
+//       new AST.ReferenceRange(
+//         PP.EnvStub,
+//         new AST.Range([
+//           [
+//             new AST.Address(
+//               2,
+//               2,
+//               AST.RelativeAddress,
+//               AST.RelativeAddress,
+//               PP.EnvStub
+//             ),
+//             new AST.Address(
+//               77,
+//               2,
+//               AST.RelativeAddress,
+//               AST.RelativeAddress,
+//               PP.EnvStub
+//             ),
+//           ],
+//         ])
+//       ),
+//       new AST.Number(PP.EnvStub, 5),
+//     ],
+//     AST.VarArgsArity
+//   );
+//   switch (output.tag) {
+//     case "success":
+//       expect(output.result).to.eql(expected);
+//       break;
+//     case "failure":
+//       assert.fail();
+//   }
+// });

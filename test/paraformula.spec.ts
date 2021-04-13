@@ -5,6 +5,7 @@ import { Range as PR } from "../src/range";
 import { Reference as PRF } from "../src/reference";
 import { ReservedWords as PRW } from "../src/reserved_words";
 import { Expression as PE } from "../src/expression";
+import { Paraformula } from "../src/paraformula";
 import { Util } from "../src/util";
 
 import { AST } from "../src/ast";
@@ -1575,5 +1576,52 @@ describe("fApply", () => {
       case "failure":
         assert.fail();
     }
+  });
+});
+
+describe("parse", () => {
+  it("should be able to parse anything", () => {
+    const input = "=SUM(A1,B2:B77,5)";
+    const output = Paraformula.parse(input);
+    const expected = new AST.ReferenceFunction(
+      PP.EnvStub,
+      "SUM",
+      [
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        ),
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(
+                2,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+              new AST.Address(
+                77,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+            ],
+          ])
+        ),
+        new AST.Number(PP.EnvStub, 5),
+      ],
+      AST.VarArgsArity
+    );
+    expect(output).to.eql(expected);
   });
 });

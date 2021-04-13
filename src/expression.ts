@@ -193,7 +193,7 @@ export module Expression {
    */
   export function arityAtLeastNFunction(R: P.IParser<AST.Range>) {
     // here, we ignore whatever Range parser we are given
-    // and use rangeNoUnion instead
+    // and use rangeContig instead
     return (n: number) => {
       return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
         // parse the function name
@@ -218,6 +218,32 @@ export module Expression {
   }
 
   /**
+   * Parses a function application of arity at least zero.
+   * @param R Range parser.
+   */
+  export function varArgsFunction(R: P.IParser<AST.Range>) {
+    // here, we ignore whatever Range parser we are given
+    // and use rangeAny instead (i.e., try both)
+    return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
+      // parse the function name
+      P.left<CU.CharStream, CU.CharStream>(PRW.varArgsFunctionName)(P.char("("))
+    )(
+      // parse the arguments
+      P.left<AST.Expression[], CU.CharStream>(
+        argumentsAtLeastN(PR.rangeAny)(0)
+      )(P.char(")"))
+    )(
+      (name, es) =>
+        new AST.ReferenceFunction(
+          PP.EnvStub,
+          name.toString(),
+          es,
+          AST.VarArgsArity
+        )
+    );
+  }
+
+  /**
    * Parses a function of arbitrary arity.
    */
   export function fApply(
@@ -231,7 +257,8 @@ export module Expression {
         fillTo(PRW.arityAtLeastNNameArray.length).map((e, i) =>
           arityAtLeastNFunction(R)(i + 1)
         )
-      )
+      ),
+      varArgsFunction(R)
     );
   }
 

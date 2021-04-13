@@ -306,17 +306,21 @@ export module Reference {
 
   /**
    * Parses any data.
+   * @param R A Range parser.
    */
-  export const data = P.choices<AST.ReferenceExpr>(
-    addressReference,
-    booleanLiteral,
-    constant,
-    // before continuing, ensure that no reserved words
-    // are present; the reservedWord parser is a lookahead parser
-    // that succeeds, consuming no input, when no reserved words
-    // are present at the start of the input stream
-    P.right<AST.ReferenceExpr, AST.ReferenceExpr>(RW.reservedWord)(
-      P.choices(stringLiteral, namedReference)
-    )
-  );
+  export function data(R: P.IParser<AST.Range>) {
+    return P.choices<AST.ReferenceExpr>(
+      rangeReference(R),
+      addressReference,
+      booleanLiteral,
+      constant,
+      // before continuing, ensure that no reserved words
+      // are present; the reservedWord parser is a lookahead parser
+      // that succeeds, consuming no input, when no reserved words
+      // are present at the start of the input stream
+      P.right<AST.ReferenceExpr, AST.ReferenceExpr>(RW.reservedWord)(
+        P.choices(stringLiteral, namedReference)
+      )
+    );
+  }
 }

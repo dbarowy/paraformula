@@ -1153,7 +1153,7 @@ describe("reservedWord", () => {
 describe("data", () => {
   it("should parse any reference to numeric data", () => {
     const input = new CU.CharStream("3");
-    const output = PRF.data(input);
+    const output = PRF.data(PR.rangeAny)(input);
     const expected = new AST.Number(PP.EnvStub, 3);
     switch (output.tag) {
       case "success":
@@ -1166,7 +1166,7 @@ describe("data", () => {
 
   it("should parse any named reference", () => {
     const input = new CU.CharStream("Joe");
-    const output = PRF.data(input);
+    const output = PRF.data(PR.rangeAny)(input);
     const expected = new AST.ReferenceNamed(PP.EnvStub, "Joe");
     switch (output.tag) {
       case "success":
@@ -1179,7 +1179,7 @@ describe("data", () => {
 
   it("should parse any string literal", () => {
     const input = new CU.CharStream('"Joe Biden"');
-    const output = PRF.data(input);
+    const output = PRF.data(PR.rangeAny)(input);
     const expected = new AST.StringLiteral(PP.EnvStub, "Joe Biden");
     switch (output.tag) {
       case "success":
@@ -1192,7 +1192,7 @@ describe("data", () => {
 
   it("should parse any boolean", () => {
     const input = new CU.CharStream("FALSE");
-    const output = PRF.data(input);
+    const output = PRF.data(PR.rangeAny)(input);
     const expected = new AST.Boolean(PP.EnvStub, false);
     switch (output.tag) {
       case "success":
@@ -1205,7 +1205,7 @@ describe("data", () => {
 
   it("should fail if it encounters a reserved word", () => {
     const input = new CU.CharStream("SUMPRODUCT");
-    const output = PRF.data(input);
+    const output = PRF.data(PR.rangeAny)(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -1223,6 +1223,36 @@ describe("argumentsN", () => {
       new AST.Number(PP.EnvStub, 1),
       new AST.Boolean(PP.EnvStub, true),
       new AST.ReferenceNamed(PP.EnvStub, "henry"),
+    ];
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
+describe("argumentsAtLeastN", () => {
+  it("should parse an argument list", () => {
+    const input = new CU.CharStream("1, TRUE, henry, FALSE, A1");
+    const output = PE.argumentsAtLeastN(PR.rangeAny)(3)(input);
+    const expected = [
+      new AST.Number(PP.EnvStub, 1),
+      new AST.Boolean(PP.EnvStub, true),
+      new AST.ReferenceNamed(PP.EnvStub, "henry"),
+      new AST.Boolean(PP.EnvStub, false),
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      ),
     ];
     switch (output.tag) {
       case "success":
@@ -1271,6 +1301,71 @@ describe("arityNFunction", () => {
           )
         ),
         new AST.Number(PP.EnvStub, 5),
+      ],
+      new AST.FixedArity(2)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
+});
+
+describe("arityAtLeastNFunction", () => {
+  it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
+    const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
+    const output = PE.arityAtLeastNFunction(PR.rangeAny)(2)(input);
+    const expected = new AST.ReferenceFunction(
+      PP.EnvStub,
+      "COUNTIFS",
+      [
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(
+                1,
+                1,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+              new AST.Address(
+                1,
+                1,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+            ],
+          ])
+        ),
+        new AST.StringLiteral(PP.EnvStub, "red"),
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(
+                2,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+              new AST.Address(
+                2,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+            ],
+          ])
+        ),
+        new AST.StringLiteral(PP.EnvStub, "tx"),
       ],
       new AST.FixedArity(2)
     );

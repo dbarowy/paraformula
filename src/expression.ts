@@ -1,7 +1,8 @@
 import { Primitives as P, CharUtil as CU } from "parsecco";
 import { AST } from "./ast";
 import { Primitives as PP } from "./primitives";
-import { Reference as PR } from "./reference";
+import { Range as PR } from "./range";
+import { Reference as PRF } from "./reference";
 import { ReservedWords as PRW } from "./reserved_words";
 
 export module Expression {
@@ -80,7 +81,9 @@ export module Expression {
    * @param n Number of times to repeat.
    */
   function seqN<T>(n: number, p: P.IParser<T>): P.IParser<T[]> {
-    if (n <= 1) {
+    if (n <= 0) {
+      return P.result([]);
+    } else if (n == 1) {
       return P.pipe<T, T[]>(p)((t) => [t]);
     } else {
       return P.pipe2<T, T[], T[]>(p)(seqN(n - 1, p))((t, ts) => append(t, ts));
@@ -105,6 +108,47 @@ export module Expression {
       return P.pipe2<AST.Expression[], AST.Expression, AST.Expression[]>(
         seqN(n - 1, argument(R))
       )(expr(R))((as, a) => rev(cons(a, as)));
+    };
+  }
+
+  /**
+   * Parses at least one `p`, followed by repeated sequences of `sep` and `p`.
+   * In BNF: `p (sep p)*`.
+   * @param p A parser
+   * @param sep A separator
+   */
+  function sepBy1<T, U>(p: P.IParser<T>) {
+    return (sep: P.IParser<U>) => {
+      return P.pipe2<T, T[], T[]>((istream: CU.CharStream) => {
+        // parse the one
+        return P.debug(P.right<CU.CharStream, T>(PP.Comma)(p))(
+          "ONE p (stream is: '" + istream.toString() + "'"
+        )(istream);
+      })(
+        // then the many
+        P.debug(P.many(P.right<U, T>(sep)(p)))("MANY p")
+      )(
+        // then combine them
+        (a, bs) => cons(a, bs)
+      );
+    };
+  }
+
+  /**
+   * Parses a list of at least `n` argument expressions.
+   * @param R A range parser.
+   * @param n Minimum number of arguments to parse.
+   */
+  export function argumentsAtLeastN(R: P.IParser<AST.Range>) {
+    return (n: number) => {
+      return P.pipe2<AST.Expression[], AST.Expression[], AST.Expression[]>(
+        //P.debug(seqN(n - 1, argument(R)))("n-1 argument prefix")
+        P.debug(argumentsN(R)(n - 1))(n - 1 + " argument prefix")
+      )(
+        P.debug(sepBy1<AST.Expression, CU.CharStream>(expr(R))(PP.Comma))(
+          "1+ argument suffix"
+        )
+      )((prefixArgs, suffixArgs) => prefixArgs.concat(suffixArgs));
     };
   }
 
@@ -148,6 +192,41 @@ export module Expression {
   }
 
   /**
+   * Parses a function application of arity at least n.
+   * @param R Range parser.
+   * @param n Arity.
+   */
+  export function arityAtLeastNFunction(R: P.IParser<AST.Range>) {
+    // here, we ignore whatever Range parser we are given
+    // and use rangeNoUnion instead
+    return (n: number) => {
+      return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
+        // parse the function name
+        P.debug(
+          P.left<CU.CharStream, CU.CharStream>(PRW.arityAtLeastNName(n))(
+            P.char("(")
+          )
+        )("function name")
+      )(
+        // parse the arguments
+        P.debug(
+          P.left<AST.Expression[], CU.CharStream>(
+            argumentsAtLeastN(PR.rangeContig)(n)
+          )(P.char(")"))
+        )("arguments")
+      )(
+        (name, es) =>
+          new AST.ReferenceFunction(
+            PP.EnvStub,
+            name.toString(),
+            es,
+            new AST.LowBoundArity(n)
+          )
+      );
+    };
+  }
+
+  /**
    * Parses a function of arbitrary arity.
    */
   export function fApply(
@@ -177,7 +256,7 @@ export module Expression {
    * Parses either functions or data.
    */
   export function exprAtom(R: P.IParser<AST.Range>) {
-    return P.choice<AST.ReferenceExpr>(fApply(R))(PR.data);
+    return P.choice<AST.ReferenceExpr>(fApply(R))(PRF.data(R));
   }
 
   /**

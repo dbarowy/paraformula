@@ -1004,9 +1004,9 @@ export module ReservedWords {
    */
   export const arityAtLeastNNameArray: P.IParser<CU.CharStream>[] = [
     // NOTE: "ArityAtLeast0" is just VarArgs
-    arityAtLeast1FunctionName,
-    arityAtLeast2FunctionName,
-    arityAtLeast3FunctionName,
+    P.debug(arityAtLeast1FunctionName)("arityAtLeast1FunctionName"),
+    P.debug(arityAtLeast2FunctionName)("arityAtLeast2FunctionName"),
+    P.debug(arityAtLeast3FunctionName)("arityAtLeast3FunctionName"),
   ];
 
   /**
@@ -1015,5 +1015,13 @@ export module ReservedWords {
    */
   export function arityNName(n: number): P.IParser<CU.CharStream> {
     return arityNNameArray[n];
+  }
+
+  /**
+   * Returns a function name parser for all functions of at least arity n.
+   * @param n Arity.
+   */
+  export function arityAtLeastNName(n: number): P.IParser<CU.CharStream> {
+    return arityAtLeastNNameArray[n - 1];
   }
 }

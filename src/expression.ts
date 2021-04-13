@@ -119,14 +119,12 @@ export module Expression {
    */
   function sepBy1<T, U>(p: P.IParser<T>) {
     return (sep: P.IParser<U>) => {
-      return P.pipe2<T, T[], T[]>((istream: CU.CharStream) => {
+      return P.pipe2<T, T[], T[]>(
         // parse the one
-        return P.debug(P.right<CU.CharStream, T>(PP.Comma)(p))(
-          "ONE p (stream is: '" + istream.toString() + "'"
-        )(istream);
-      })(
+        P.right<CU.CharStream, T>(PP.Comma)(p)
+      )(
         // then the many
-        P.debug(P.many(P.right<U, T>(sep)(p)))("MANY p")
+        P.many(P.right<U, T>(sep)(p))
       )(
         // then combine them
         (a, bs) => cons(a, bs)
@@ -142,12 +140,9 @@ export module Expression {
   export function argumentsAtLeastN(R: P.IParser<AST.Range>) {
     return (n: number) => {
       return P.pipe2<AST.Expression[], AST.Expression[], AST.Expression[]>(
-        //P.debug(seqN(n - 1, argument(R)))("n-1 argument prefix")
-        P.debug(argumentsN(R)(n - 1))(n - 1 + " argument prefix")
+        argumentsN(R)(n - 1)
       )(
-        P.debug(sepBy1<AST.Expression, CU.CharStream>(expr(R))(PP.Comma))(
-          "1+ argument suffix"
-        )
+        sepBy1<AST.Expression, CU.CharStream>(expr(R))(PP.Comma)
       )((prefixArgs, suffixArgs) => prefixArgs.concat(suffixArgs));
     };
   }
@@ -202,18 +197,14 @@ export module Expression {
     return (n: number) => {
       return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
         // parse the function name
-        P.debug(
-          P.left<CU.CharStream, CU.CharStream>(PRW.arityAtLeastNName(n))(
-            P.char("(")
-          )
-        )("function name")
+        P.left<CU.CharStream, CU.CharStream>(PRW.arityAtLeastNName(n))(
+          P.char("(")
+        )
       )(
         // parse the arguments
-        P.debug(
-          P.left<AST.Expression[], CU.CharStream>(
-            argumentsAtLeastN(PR.rangeContig)(n)
-          )(P.char(")"))
-        )("arguments")
+        P.left<AST.Expression[], CU.CharStream>(
+          argumentsAtLeastN(PR.rangeContig)(n)
+        )(P.char(")"))
       )(
         (name, es) =>
           new AST.ReferenceFunction(
@@ -232,8 +223,15 @@ export module Expression {
   export function fApply(
     R: P.IParser<AST.Range>
   ): P.IParser<AST.ReferenceFunction> {
-    return choicesFrom(
-      fillTo(PRW.arityNNameArray.length).map((e, i) => arityNFunction(R)(i))
+    return P.choices(
+      choicesFrom(
+        fillTo(PRW.arityNNameArray.length).map((e, i) => arityNFunction(R)(i))
+      ),
+      choicesFrom(
+        fillTo(PRW.arityAtLeastNNameArray.length).map((e, i) =>
+          arityAtLeastNFunction(R)(i + 1)
+        )
+      )
     );
   }
 

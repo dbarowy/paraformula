@@ -1409,6 +1409,69 @@ describe("fApply", () => {
         assert.fail();
     }
   });
+
+  it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
+    const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
+    const output = PE.arityAtLeastNFunction(PR.rangeAny)(2)(input);
+    const expected = new AST.ReferenceFunction(
+      PP.EnvStub,
+      "COUNTIFS",
+      [
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(
+                1,
+                1,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+              new AST.Address(
+                1,
+                1,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+            ],
+          ])
+        ),
+        new AST.StringLiteral(PP.EnvStub, "red"),
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(
+                2,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+              new AST.Address(
+                2,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+            ],
+          ])
+        ),
+        new AST.StringLiteral(PP.EnvStub, "tx"),
+      ],
+      new AST.FixedArity(2)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      case "failure":
+        assert.fail();
+    }
+  });
 });
 
 // it("should parse a varargs function application like SUM()", () => {

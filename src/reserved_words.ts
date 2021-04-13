@@ -1004,9 +1004,9 @@ export module ReservedWords {
    */
   export const arityAtLeastNNameArray: P.IParser<CU.CharStream>[] = [
     // NOTE: "ArityAtLeast0" is just VarArgs
-    P.debug(arityAtLeast1FunctionName)("arityAtLeast1FunctionName"),
-    P.debug(arityAtLeast2FunctionName)("arityAtLeast2FunctionName"),
-    P.debug(arityAtLeast3FunctionName)("arityAtLeast3FunctionName"),
+    arityAtLeast1FunctionName,
+    arityAtLeast2FunctionName,
+    arityAtLeast3FunctionName,
   ];
 
   /**

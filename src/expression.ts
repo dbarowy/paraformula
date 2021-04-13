@@ -80,13 +80,13 @@ export module Expression {
    * @param p A parser.
    * @param n Number of times to repeat.
    */
-  function seqN<T>(n: number, p: P.IParser<T>): P.IParser<T[]> {
+  function repN<T>(n: number, p: P.IParser<T>): P.IParser<T[]> {
     if (n <= 0) {
       return P.result([]);
     } else if (n == 1) {
       return P.pipe<T, T[]>(p)((t) => [t]);
     } else {
-      return P.pipe2<T, T[], T[]>(p)(seqN(n - 1, p))((t, ts) => append(t, ts));
+      return P.pipe2<T, T[], T[]>(p)(repN(n - 1, p))((t, ts) => append(t, ts));
     }
   }
 
@@ -106,7 +106,7 @@ export module Expression {
   export function argumentsN(R: P.IParser<AST.Range>) {
     return (n: number) => {
       return P.pipe2<AST.Expression[], AST.Expression, AST.Expression[]>(
-        seqN(n - 1, argument(R))
+        repN(n - 1, argument(R))
       )(expr(R))((as, a) => rev(cons(a, as)));
     };
   }

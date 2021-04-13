@@ -35,7 +35,7 @@ export module Range {
   /**
    * Parses a discontiguous A1-style range list.
    */
-  export const rangeA1Discontig = P.seq<AST.Range[], AST.Range, AST.Range>(
+  export const rangeA1Discontig = P.pipe2<AST.Range[], AST.Range, AST.Range>(
     // recursive case
     P.many1(P.left<AST.Range, CU.CharStream>(rangeA1Contig)(PP.Comma))
   )(
@@ -43,13 +43,13 @@ export module Range {
     rangeA1Contig
   )(
     // reducer
-    ([rs, r]) => rs.reduce((acc, r) => acc.merge(r)).merge(r)
+    (rs, r) => rs.reduce((acc, r) => acc.merge(r)).merge(r)
   );
 
   /**
    * Parses a discontiguous R1C1-style range list.
    */
-  export const rangeR1C1Discontig = P.seq<AST.Range[], AST.Range, AST.Range>(
+  export const rangeR1C1Discontig = P.pipe2<AST.Range[], AST.Range, AST.Range>(
     // recursive case
     P.many1(P.left<AST.Range, CU.CharStream>(rangeR1C1Contig)(PP.Comma))
   )(
@@ -57,7 +57,7 @@ export module Range {
     rangeR1C1Contig
   )(
     // reducer
-    ([rs, r]) => rs.reduce((acc, r) => acc.merge(r)).merge(r)
+    (rs, r) => rs.reduce((acc, r) => acc.merge(r)).merge(r)
   );
 
   /**

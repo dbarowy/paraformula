@@ -12,12 +12,12 @@ export module Primitives {
    */
   export const Z = P.choices(
     // leading + sign
-    P.seq<CU.CharStream, number, number>(P.str("+"))(P.integer)(
-      ([, num]) => num
+    P.pipe2<CU.CharStream, number, number>(P.str("+"))(P.integer)(
+      (sign, num) => num
     ),
     // leading - sign
-    P.seq<CU.CharStream, number, number>(P.str("-"))(P.integer)(
-      ([, num]) => -num
+    P.pipe2<CU.CharStream, number, number>(P.str("-"))(P.integer)(
+      (sign, num) => -num
     ),
     // no leading sign
     P.integer

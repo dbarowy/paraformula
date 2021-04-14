@@ -1,9 +1,9 @@
 {
   "name": "paraformula",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An Excel formula language parser, written in Typescript",
-  "main": "./dist/paraformula.js",
-  "types": "./dist/paraformula.d.ts",
+  "main": "./dist/src/paraformula.js",
+  "types": "./dist/src/paraformula.d.ts",
   "scripts": {
     "test": "mocha -r ts-node/register test/*.spec.ts",
     "build": "tsc"

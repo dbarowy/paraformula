@@ -44,6 +44,7 @@ export module Util {
         return -1;
       }
     });
+    process.stdout.write(JSON.stringify(arr) + "\n");
     return arr;
   }
 
@@ -52,8 +53,8 @@ export module Util {
    * @param ss An array of strings
    */
   export function strAlternatives(ss: string[]): P.IParser<CU.CharStream> {
-    const sorted = longestMatchFirst(ss);
-    const parsers = sorted.map((s) => P.str(s));
-    return P.choices<CU.CharStream>(...parsers);
+    const parsers = ss.map((s) => P.str(s));
+    const p = P.choices<CU.CharStream>(...parsers);
+    return p;
   }
 }

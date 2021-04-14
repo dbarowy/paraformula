@@ -12,18 +12,10 @@ An Excel formula language parser, written in Typescript
 
 Paraformula allows you to parse Excel formula expressions into an AST.
 
-```
+```typescript
 import { Paraformula } from "paraformula";
 
-// ...
-
-try {
-    const ast = Paraformula.parse('=COUNTIFS(A1:A1,"red",B2:B2,"tx")');
-} catch (e) {
-    // parsing failed
-    console.log(e);
-}
-
+const ast = Paraformula.parse('=COUNTIFS(A1:A1,"red",B2:B2,"tx")');
 ```
 
 `parse` returns an AST on success, otherwise it throws an exception.

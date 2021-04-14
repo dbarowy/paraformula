@@ -1828,6 +1828,31 @@ describe("binOp", () => {
         assert.fail();
     }
   });
+
+  it("should parse unary expressions", () => {
+    const input = new CU.CharStream("-R23C45");
+    const output = PB.binOp(PR.rangeAny)(input);
+    const expected = new AST.UnaryOpExpression(
+      "-",
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          23,
+          45,
+          AST.AbsoluteAddress,
+          AST.AbsoluteAddress,
+          PP.EnvStub
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
 });
 
 describe("parse", () => {

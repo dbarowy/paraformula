@@ -143,9 +143,27 @@ export module BinaryOperators {
   }
 
   /**
+   * Parses unary expressions.
+   * @param R A Range parser.
+   */
+  function unary(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
+    return P.choice<AST.Expression>(
+      P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(P.char("+"))(
+        PE.exprSimple(R)
+      )((sign, e) => new AST.UnaryOpExpression("+", e))
+    )(
+      P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(P.char("-"))(
+        PE.exprSimple(R)
+      )((sign, e) => new AST.UnaryOpExpression("-", e))
+    );
+  }
+
+  /**
    * `binOp` parses any binary operator expression.  This parser should
    * ensure that Excel's operator precedence and associativity rules
    * are followed.
    */
-  export const binOp = addend;
+  export function binOp(R: P.IParser<AST.Range>) {
+    return P.choice(unary(R))(addend(R));
+  }
 }

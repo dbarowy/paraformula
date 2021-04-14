@@ -1,1 +1,5 @@
 examples
+/src
+.vscode
+tsconfig.json
+test

@@ -24,9 +24,16 @@ export module Primitives {
   );
 
   /**
+   * Parses a `p`, preceeded and suceeded with whitespace. Returns
+   * only the result of `p`.
+   * @param p A parser
+   */
+  export function wsPad<T>(p: P.IParser<T>) {
+    return P.between<CU.CharStream, CU.CharStream, T>(P.ws)(P.ws)(p);
+  }
+
+  /**
    * Parses a comma surrounded by optional whitespace.
    */
-  export const Comma = P.between<CU.CharStream, CU.CharStream, CU.CharStream>(
-    P.ws
-  )(P.ws)(P.str(","));
+  export const Comma = wsPad(P.str(","));
 }

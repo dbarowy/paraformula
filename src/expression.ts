@@ -4,6 +4,7 @@ import { Primitives as PP } from "./primitives";
 import { Range as PR } from "./range";
 import { Reference as PRF } from "./reference";
 import { ReservedWords as PRW } from "./reserved_words";
+import { BinaryOperators as PB } from "./binary_operators";
 
 export module Expression {
   /**
@@ -81,13 +82,26 @@ export module Expression {
    * @param n Number of times to repeat.
    */
   function repN<T>(n: number, p: P.IParser<T>): P.IParser<T[]> {
-    if (n <= 0) {
-      return P.result([]);
-    } else if (n == 1) {
-      return P.pipe<T, T[]>(p)((t) => [t]);
-    } else {
-      return P.pipe2<T, T[], T[]>(p)(repN(n - 1, p))((t, ts) => append(t, ts));
-    }
+    return (istream: CU.CharStream) => {
+      let input = istream;
+      let i = n;
+      const results: T[] = [];
+      let done = false;
+      while (i > 0 && !done) {
+        const output = p(input);
+        switch (output.tag) {
+          case "success":
+            results.push(output.result);
+            break;
+          case "failure":
+            done = true;
+            break;
+        }
+        input = output.inputstream;
+        i--;
+      }
+      return new P.Success(input, rev(results));
+    };
   }
 
   /**
@@ -296,5 +310,7 @@ export module Expression {
    * Parses an arbitrarily complex expression.
    * @param R A range parser.
    */
-  exprImpl.contents = (R: P.IParser<AST.Range>) => exprSimple(R);
+  exprImpl.contents = (R: P.IParser<AST.Range>) =>
+    // P.choice(PB.binOp(R))(exprSimple(R));
+    P.choice(exprSimple(R))(PB.binOp(R));
 }

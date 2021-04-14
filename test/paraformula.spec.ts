@@ -5,9 +5,9 @@ import { Range as PR } from "../src/range";
 import { Reference as PRF } from "../src/reference";
 import { ReservedWords as PRW } from "../src/reserved_words";
 import { Expression as PE } from "../src/expression";
+import { BinaryOperators as PB } from "../src/binary_operators";
 import { Paraformula } from "../src/paraformula";
 import { Util } from "../src/util";
-
 import { AST } from "../src/ast";
 import { assert, Assertion, expect } from "chai";
 import "mocha";
@@ -1574,6 +1574,257 @@ describe("fApply", () => {
         expect(output.result).to.eql(expected);
         break;
       case "failure":
+        assert.fail();
+    }
+  });
+});
+
+describe("binOp", () => {
+  it("should parse an addition expression like A1 + B2", () => {
+    const input = new CU.CharStream("A1 + B2");
+    const output = PB.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "+",
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      ),
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          2,
+          2,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should correctly deal with precedence in an expresion like A1 * B2 + C3", () => {
+    const input = new CU.CharStream("A1 * B2 + C3");
+    const output = PB.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "+",
+      new AST.BinOpExpression(
+        "*",
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        ),
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            2,
+            2,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        )
+      ),
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          3,
+          3,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should parse a subtraction expression like A1 - B2", () => {
+    const input = new CU.CharStream("A1 - B2");
+    const output = PB.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "-",
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      ),
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          2,
+          2,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should parse a division expression like A1 / B2", () => {
+    const input = new CU.CharStream("A1 / B2");
+    const output = PB.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "/",
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      ),
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          2,
+          2,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should handle left-associativity in A1 - B2 + C3", () => {
+    const input = new CU.CharStream("A1 - B2 + C3");
+    const output = PB.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "+",
+      new AST.BinOpExpression(
+        "-",
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        ),
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            2,
+            2,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        )
+      ),
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          3,
+          3,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should handle left-associativity in A1 / B2 * C3", () => {
+    const input = new CU.CharStream("A1 / B2 * C3");
+    const output = PB.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "*",
+      new AST.BinOpExpression(
+        "/",
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        ),
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            2,
+            2,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        )
+      ),
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          3,
+          3,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
         assert.fail();
     }
   });

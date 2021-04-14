@@ -5,7 +5,6 @@ import { Range as PR } from "../src/range";
 import { Reference as PRF } from "../src/reference";
 import { ReservedWords as PRW } from "../src/reserved_words";
 import { Expression as PE } from "../src/expression";
-import { BinaryOperators as PB } from "../src/binary_operators";
 import { Paraformula } from "../src/paraformula";
 import { Util } from "../src/util";
 import { AST } from "../src/ast";
@@ -1582,7 +1581,7 @@ describe("fApply", () => {
 describe("binOp", () => {
   it("should parse an addition expression like A1 + B2", () => {
     const input = new CU.CharStream("A1 + B2");
-    const output = PB.binOp(PR.rangeAny)(input);
+    const output = PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "+",
       new AST.ReferenceAddress(
@@ -1617,7 +1616,7 @@ describe("binOp", () => {
 
   it("should correctly deal with precedence in an expresion like A1 * B2 + C3", () => {
     const input = new CU.CharStream("A1 * B2 + C3");
-    const output = PB.binOp(PR.rangeAny)(input);
+    const output = PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "+",
       new AST.BinOpExpression(
@@ -1665,7 +1664,7 @@ describe("binOp", () => {
 
   it("should parse a subtraction expression like A1 - B2", () => {
     const input = new CU.CharStream("A1 - B2");
-    const output = PB.binOp(PR.rangeAny)(input);
+    const output = PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "-",
       new AST.ReferenceAddress(
@@ -1700,7 +1699,7 @@ describe("binOp", () => {
 
   it("should parse a division expression like A1 / B2", () => {
     const input = new CU.CharStream("A1 / B2");
-    const output = PB.binOp(PR.rangeAny)(input);
+    const output = PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "/",
       new AST.ReferenceAddress(
@@ -1735,7 +1734,7 @@ describe("binOp", () => {
 
   it("should handle left-associativity in A1 - B2 + C3", () => {
     const input = new CU.CharStream("A1 - B2 + C3");
-    const output = PB.binOp(PR.rangeAny)(input);
+    const output = PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "+",
       new AST.BinOpExpression(
@@ -1783,7 +1782,7 @@ describe("binOp", () => {
 
   it("should handle left-associativity in A1 / B2 * C3", () => {
     const input = new CU.CharStream("A1 / B2 * C3");
-    const output = PB.binOp(PR.rangeAny)(input);
+    const output = PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "*",
       new AST.BinOpExpression(
@@ -1831,7 +1830,7 @@ describe("binOp", () => {
 
   it("should parse unary expressions", () => {
     const input = new CU.CharStream("-R23C45");
-    const output = PB.binOp(PR.rangeAny)(input);
+    const output = PE.binOp(PR.rangeAny)(input);
     const expected = new AST.UnaryOpExpression(
       "-",
       new AST.ReferenceAddress(

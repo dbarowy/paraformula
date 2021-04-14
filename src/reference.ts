@@ -2,7 +2,6 @@ import { AST } from "./ast";
 import { Primitives as P, CharUtil as CU } from "parsecco";
 import { Primitives as PP } from "./primitives";
 import { Address as PA } from "./address";
-import { Range as PR } from "./range";
 import { ReservedWords as RW } from "./reserved_words";
 
 export module Reference {

@@ -311,6 +311,5 @@ export module Expression {
    * @param R A range parser.
    */
   exprImpl.contents = (R: P.IParser<AST.Range>) =>
-    // P.choice(PB.binOp(R))(exprSimple(R));
     P.choice(exprSimple(R))(PB.binOp(R));
 }

@@ -1,0 +1,25 @@
+{
+  "name": "paraformula-simple-example",
+  "version": "1.0.0",
+  "description": "Example Paraformula usage",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbarowy/paraformula.git"
+  },
+  "author": "Daniel W. Barowy",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/dbarowy/paraformula/issues"
+  },
+  "homepage": "https://github.com/dbarowy/paraformula#readme",
+  "dependencies": {
+    "paraformula": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "typescript": "^4.2.3"
+  }
+}

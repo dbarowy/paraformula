@@ -6,7 +6,13 @@ An Excel formula language parser, written in Typescript
 
 ## Availability
 
-(coming soon) Paraformula is available via [NPM](https://npmjs.org). Paraformula has one dependency, on the [parsecco](https://github.com/williams-cs/parsecco) combinator library, which itself has **no** dependencies.
+Paraformula is available via [NPM](https://npmjs.org):
+
+```
+$ npm install --save paraformula
+```
+
+Paraformula has one dependency, the [Parsecco](https://github.com/williams-cs/parsecco) combinator library. Parsecco itself has **no** dependencies.
 
 ## Usage
 

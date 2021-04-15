@@ -2,10 +2,10 @@ export module AST {
   export type Expr = ReferenceExpr;
 
   export class Env {
-    tag = "Env";
-    public path: string;
-    public workbookName: string;
-    public worksheetName: string;
+    public readonly tag = "Env";
+    public readonly path: string;
+    public readonly workbookName: string;
+    public readonly worksheetName: string;
 
     constructor(path: string, workbookName: string, worksheetName: string) {
       this.path = path;
@@ -37,12 +37,12 @@ export module AST {
   export type AddressMode = AbsoluteAddressMode | RelativeAddressMode;
 
   export class Address {
-    tag = "Address";
-    public row: number;
-    public column: number;
-    public rowMode: AddressMode;
-    public colMode: AddressMode;
-    public env: Env;
+    public readonly tag = "Address";
+    public readonly row: number;
+    public readonly column: number;
+    public readonly rowMode: AddressMode;
+    public readonly colMode: AddressMode;
+    public readonly env: Env;
 
     constructor(
       row: number,
@@ -102,8 +102,8 @@ export module AST {
   }
 
   export class Range {
-    tag = "Range";
-    public regions: [Address, Address][] = [];
+    public readonly tag = "Range";
+    public readonly regions: [Address, Address][] = [];
 
     constructor(regions: [Address, Address][]) {
       this.regions = regions;
@@ -148,10 +148,10 @@ export module AST {
   }
 
   export abstract class ReferenceExpr {
-    tag = "ReferenceExpr";
-    path: string;
-    workbookName: string;
-    worksheetName: string;
+    public tag = "ReferenceExpr";
+    public readonly path: string;
+    public readonly workbookName: string;
+    public readonly worksheetName: string;
     abstract toString(): string;
 
     constructor(env: Env) {
@@ -166,7 +166,7 @@ export module AST {
   }
 
   export class ReferenceRange extends ReferenceExpr {
-    tag = "ReferenceRange";
+    public readonly tag = "ReferenceRange";
     public readonly rng: Range;
 
     constructor(env: Env, r: Range) {
@@ -190,7 +190,7 @@ export module AST {
   }
 
   export class ReferenceAddress extends ReferenceExpr {
-    tag = "ReferenceAddress";
+    public readonly tag = "ReferenceAddress";
     public readonly address: Address;
 
     constructor(env: Env, address: Address) {
@@ -214,7 +214,7 @@ export module AST {
   }
 
   export class ReferenceNamed extends ReferenceExpr {
-    tag = "ReferenceNamed";
+    public readonly tag = "ReferenceNamed";
     public readonly varName: string;
 
     constructor(env: Env, varName: string) {
@@ -247,7 +247,7 @@ export module AST {
   export type Arity = FixedArity | LowBoundArity | VarArgsArity;
 
   export class FunctionApplication extends ReferenceExpr {
-    tag = "FunctionApplication";
+    public readonly tag = "FunctionApplication";
     public readonly name: string;
     public readonly args: Expression[];
     public readonly arity: Arity;
@@ -267,7 +267,7 @@ export module AST {
   }
 
   export class Number extends ReferenceExpr {
-    tag = "Number";
+    public readonly tag = "Number";
     public readonly value: number;
 
     constructor(env: Env, value: number) {
@@ -281,7 +281,7 @@ export module AST {
   }
 
   export class StringLiteral extends ReferenceExpr {
-    tag = "StringLiteral";
+    public readonly tag = "StringLiteral";
     public readonly value: string;
 
     constructor(env: Env, value: string) {
@@ -295,7 +295,7 @@ export module AST {
   }
 
   export class Boolean extends ReferenceExpr {
-    tag = "Boolean";
+    public readonly tag = "Boolean";
     public readonly value: boolean;
 
     constructor(env: Env, value: boolean) {
@@ -312,7 +312,7 @@ export module AST {
   // the reserved words class, which is designed
   // to fail
   export class PoisonPill extends ReferenceExpr {
-    tag = "PoisonPill";
+    public readonly tag = "PoisonPill";
     constructor(env: Env) {
       super(env);
     }
@@ -323,8 +323,8 @@ export module AST {
   }
 
   export class ParensExpr {
-    tag = "ParensExpr";
-    public expr: Expression;
+    public readonly tag = "ParensExpr";
+    public readonly expr: Expression;
 
     constructor(expr: Expression) {
       this.expr = expr;
@@ -336,10 +336,10 @@ export module AST {
   }
 
   export class BinOpExpression {
-    tag = "BinOpExpression";
-    public op: string;
-    public exprL: Expression;
-    public exprR: Expression;
+    public readonly tag = "BinOpExpression";
+    public readonly op: string;
+    public readonly exprL: Expression;
+    public readonly exprR: Expression;
 
     constructor(op: string, exprL: Expression, exprR: Expression) {
       this.op = op;
@@ -361,9 +361,9 @@ export module AST {
   }
 
   export class UnaryOpExpression {
-    tag = "UnaryOpExpression";
-    public op: string;
-    public expr: Expression;
+    public readonly tag = "UnaryOpExpression";
+    public readonly op: string;
+    public readonly expr: Expression;
 
     constructor(op: string, expr: Expression) {
       this.op = op;

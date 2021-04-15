@@ -22,7 +22,7 @@ Paraformula allows you to parse Excel formula expressions into an AST.
 import { Paraformula } from "paraformula";
 
 const ast = Paraformula.parse('=COUNTIFS(C5:C14,"red",D5:D14,"tx")');
-console.log(JSON.stringify(ast, null, 2));
+console.log(JSON.stringify(ast));
 ```
 
 `parse` returns an AST on success, otherwise it throws an exception. A complete, runnable Node version of the above program is in the `examples/simple` directory. To run it:
@@ -38,7 +38,7 @@ which prints something like:
 
 ```typescript
 {
-  "tag": "ReferenceExpr",
+  "tag": "ReferenceFunction",
   "path": "",
   "workbookName": "",
   "worksheetName": "",

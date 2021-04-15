@@ -21,7 +21,7 @@
   "homepage": "https://github.com/dbarowy/paraformula#readme",
   "dependencies": {
     "json-stringify-pretty-compact": "^3.0.0",
-    "paraformula": "^1.0.4"
+    "paraformula": "^1.0.5"
   },
   "devDependencies": {
     "@types/node": "^14.14.37",

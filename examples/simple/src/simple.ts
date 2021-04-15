@@ -1,10 +1,5 @@
 import { Paraformula } from "paraformula";
-// import * as Paraformula from "paraformula";
-// const Paraformula = require("paraformula");
-// import Paraformula from "paraformula";
-// import { default as Paraformula } from "paraformula";
-// import { Primitives as P, CharUtil as CU } from "parsecco";
+const stringify = require("json-stringify-pretty-compact");
 
-const input = "=SUM(A1,B2:B77,5)";
-const output2 = Paraformula.parse(input);
-console.log(output2);
+const ast = Paraformula.parse('=COUNTIFS(C5:C14,"red",D5:D14,"tx")');
+console.log(stringify(ast));

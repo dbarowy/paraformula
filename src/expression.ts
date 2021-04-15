@@ -325,11 +325,11 @@ export module Expression {
   export function arityNFunction(R: P.IParser<AST.Range>) {
     return (n: number) => {
       if (n === 0) {
-        return P.pipe<CU.CharStream, AST.ReferenceFunction>(
+        return P.pipe<CU.CharStream, AST.FunctionApplication>(
           P.left(PRW.arityNName(0))(P.str("()"))
         )(
           (name) =>
-            new AST.ReferenceFunction(
+            new AST.FunctionApplication(
               PP.EnvStub,
               name.toString(),
               [],
@@ -337,7 +337,11 @@ export module Expression {
             )
         );
       } else {
-        return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
+        return P.pipe2<
+          CU.CharStream,
+          AST.Expression[],
+          AST.FunctionApplication
+        >(
           // parse the function name
           P.left<CU.CharStream, CU.CharStream>(PRW.arityNName(n))(P.char("("))
         )(
@@ -345,7 +349,7 @@ export module Expression {
           P.left<AST.Expression[], CU.CharStream>(argumentsN(R)(n))(P.char(")"))
         )(
           (name, es) =>
-            new AST.ReferenceFunction(
+            new AST.FunctionApplication(
               PP.EnvStub,
               name.toString(),
               es,
@@ -365,7 +369,7 @@ export module Expression {
     // here, we ignore whatever Range parser we are given
     // and use rangeContig instead
     return (n: number) => {
-      return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
+      return P.pipe2<CU.CharStream, AST.Expression[], AST.FunctionApplication>(
         // parse the function name
         P.left<CU.CharStream, CU.CharStream>(PRW.arityAtLeastNName(n))(
           P.char("(")
@@ -377,7 +381,7 @@ export module Expression {
         )(P.char(")"))
       )(
         (name, es) =>
-          new AST.ReferenceFunction(
+          new AST.FunctionApplication(
             PP.EnvStub,
             name.toString(),
             es,
@@ -394,7 +398,7 @@ export module Expression {
   export function varArgsFunction(R: P.IParser<AST.Range>) {
     // here, we ignore whatever Range parser we are given
     // and use rangeAny instead (i.e., try both)
-    return P.pipe2<CU.CharStream, AST.Expression[], AST.ReferenceFunction>(
+    return P.pipe2<CU.CharStream, AST.Expression[], AST.FunctionApplication>(
       // parse the function name
       P.left<CU.CharStream, CU.CharStream>(PRW.varArgsFunctionName)(P.char("("))
     )(
@@ -404,11 +408,11 @@ export module Expression {
       )(P.char(")"))
     )(
       (name, es) =>
-        new AST.ReferenceFunction(
+        new AST.FunctionApplication(
           PP.EnvStub,
           name.toString(),
           es,
-          AST.VarArgsArity
+          AST.VarArgsArityInst
         )
     );
   }
@@ -418,7 +422,7 @@ export module Expression {
    */
   export function fApply(
     R: P.IParser<AST.Range>
-  ): P.IParser<AST.ReferenceFunction> {
+  ): P.IParser<AST.FunctionApplication> {
     return P.choices(
       choicesFrom(
         fillTo(PRW.arityNNameArray.length).map((e, i) => arityNFunction(R)(i))

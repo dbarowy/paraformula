@@ -2,6 +2,7 @@ export module AST {
   export type Expr = ReferenceExpr;
 
   export class Env {
+    tag = "Env";
     public path: string;
     public workbookName: string;
     public worksheetName: string;
@@ -22,20 +23,21 @@ export module AST {
   }
 
   export interface AbsoluteAddressMode {
-    kind: "AbsoluteAddress";
+    tag: "AbsoluteAddress";
   }
   export interface RelativeAddressMode {
-    kind: "RelativeAddress";
+    tag: "RelativeAddress";
   }
   export const AbsoluteAddress: AbsoluteAddressMode = {
-    kind: "AbsoluteAddress",
+    tag: "AbsoluteAddress",
   };
   export const RelativeAddress: RelativeAddressMode = {
-    kind: "RelativeAddress",
+    tag: "RelativeAddress",
   };
   export type AddressMode = AbsoluteAddressMode | RelativeAddressMode;
 
   export class Address {
+    tag = "Address";
     public row: number;
     public column: number;
     public rowMode: AddressMode;
@@ -100,6 +102,7 @@ export module AST {
   }
 
   export class Range {
+    tag = "Range";
     public regions: [Address, Address][] = [];
 
     constructor(regions: [Address, Address][]) {
@@ -145,7 +148,7 @@ export module AST {
   }
 
   export abstract class ReferenceExpr {
-    tag: "ReferenceExpr" = "ReferenceExpr";
+    tag = "ReferenceExpr";
     path: string;
     workbookName: string;
     worksheetName: string;
@@ -163,6 +166,7 @@ export module AST {
   }
 
   export class ReferenceRange extends ReferenceExpr {
+    tag = "ReferenceRange";
     public readonly rng: Range;
 
     constructor(env: Env, r: Range) {
@@ -186,6 +190,7 @@ export module AST {
   }
 
   export class ReferenceAddress extends ReferenceExpr {
+    tag = "ReferenceAddress";
     public readonly address: Address;
 
     constructor(env: Env, address: Address) {
@@ -209,6 +214,7 @@ export module AST {
   }
 
   export class ReferenceNamed extends ReferenceExpr {
+    tag = "ReferenceNamed";
     public readonly varName: string;
 
     constructor(env: Env, varName: string) {
@@ -235,12 +241,13 @@ export module AST {
     }
   }
 
-  class VarArgsArityClz {}
-  export const VarArgsArity = new VarArgsArityClz();
+  class VarArgsArity {}
+  export const VarArgsArityInst = new VarArgsArity();
 
-  export type Arity = FixedArity | LowBoundArity | VarArgsArityClz;
+  export type Arity = FixedArity | LowBoundArity | VarArgsArity;
 
-  export class ReferenceFunction extends ReferenceExpr {
+  export class FunctionApplication extends ReferenceExpr {
+    tag = "FunctionApplication";
     public readonly name: string;
     public readonly args: Expression[];
     public readonly arity: Arity;
@@ -260,6 +267,7 @@ export module AST {
   }
 
   export class Number extends ReferenceExpr {
+    tag = "Number";
     public readonly value: number;
 
     constructor(env: Env, value: number) {
@@ -273,6 +281,7 @@ export module AST {
   }
 
   export class StringLiteral extends ReferenceExpr {
+    tag = "StringLiteral";
     public readonly value: string;
 
     constructor(env: Env, value: string) {
@@ -286,6 +295,7 @@ export module AST {
   }
 
   export class Boolean extends ReferenceExpr {
+    tag = "Boolean";
     public readonly value: boolean;
 
     constructor(env: Env, value: boolean) {
@@ -302,6 +312,7 @@ export module AST {
   // the reserved words class, which is designed
   // to fail
   export class PoisonPill extends ReferenceExpr {
+    tag = "PoisonPill";
     constructor(env: Env) {
       super(env);
     }
@@ -312,7 +323,7 @@ export module AST {
   }
 
   export class ParensExpr {
-    tag: "ParensExpr" = "ParensExpr";
+    tag = "ParensExpr";
     public expr: Expression;
 
     constructor(expr: Expression) {
@@ -325,7 +336,7 @@ export module AST {
   }
 
   export class BinOpExpression {
-    tag: "BinOpExpression" = "BinOpExpression";
+    tag = "BinOpExpression";
     public op: string;
     public exprL: Expression;
     public exprR: Expression;
@@ -350,7 +361,7 @@ export module AST {
   }
 
   export class UnaryOpExpression {
-    tag: "UnaryOpExpression" = "UnaryOpExpression";
+    tag = "UnaryOpExpression";
     public op: string;
     public expr: Expression;
 

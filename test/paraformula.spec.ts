@@ -1268,7 +1268,7 @@ describe("arityNFunction", () => {
   it("should parse a zero-arity function application like RAND()", () => {
     const input = new CU.CharStream("RAND()");
     const output = PE.arityNFunction(PR.rangeAny)(0)(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "RAND",
       [],
@@ -1286,7 +1286,7 @@ describe("arityNFunction", () => {
   it("should parse a more-than-zero-arity function application like CEILING()", () => {
     const input = new CU.CharStream("CEILING(A1,5)");
     const output = PE.arityNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "CEILING",
       [
@@ -1318,7 +1318,7 @@ describe("arityAtLeastNFunction", () => {
   it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
     const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
     const output = PE.arityAtLeastNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "COUNTIFS",
       [
@@ -1383,7 +1383,7 @@ describe("varArgsFunction", () => {
   it("should parse a varargs function application like SUM()", () => {
     const input = new CU.CharStream("SUM(A1,B2:B77,5)");
     const output = PE.varArgsFunction(PR.rangeAny)(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "SUM",
       [
@@ -1420,7 +1420,7 @@ describe("varArgsFunction", () => {
         ),
         new AST.Number(PP.EnvStub, 5),
       ],
-      AST.VarArgsArity
+      AST.VarArgsArityInst
     );
     switch (output.tag) {
       case "success":
@@ -1436,7 +1436,7 @@ describe("fApply", () => {
   it("should parse a fixed arity function application like CEILING()", () => {
     const input = new CU.CharStream("CEILING(A1,5)");
     const output = PE.arityNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "CEILING",
       [
@@ -1466,7 +1466,7 @@ describe("fApply", () => {
   it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
     const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
     const output = PE.arityAtLeastNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "COUNTIFS",
       [
@@ -1529,7 +1529,7 @@ describe("fApply", () => {
   it("should parse a varargs function application like SUM()", () => {
     const input = new CU.CharStream("SUM(A1,B2:B77,5)");
     const output = PE.varArgsFunction(PR.rangeAny)(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "SUM",
       [
@@ -1566,7 +1566,7 @@ describe("fApply", () => {
         ),
         new AST.Number(PP.EnvStub, 5),
       ],
-      AST.VarArgsArity
+      AST.VarArgsArityInst
     );
     switch (output.tag) {
       case "success":
@@ -1858,7 +1858,7 @@ describe("parse", () => {
   it("should be able to parse anything", () => {
     const input = "=SUM(A1,B2:B77,5)";
     const output = Paraformula.parse(input);
-    const expected = new AST.ReferenceFunction(
+    const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "SUM",
       [
@@ -1895,7 +1895,7 @@ describe("parse", () => {
         ),
         new AST.Number(PP.EnvStub, 5),
       ],
-      AST.VarArgsArity
+      AST.VarArgsArityInst
     );
     expect(output).to.eql(expected);
   });

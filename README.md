@@ -21,10 +21,99 @@ Paraformula allows you to parse Excel formula expressions into an AST.
 ```typescript
 import { Paraformula } from "paraformula";
 
-const ast = Paraformula.parse('=COUNTIFS(A1:A1,"red",B2:B2,"tx")');
+const ast = Paraformula.parse('=COUNTIFS(C5:C14,"red",D5:D14,"tx")');
+console.log(JSON.stringify(ast, null, 2));
 ```
 
-`parse` returns an AST on success, otherwise it throws an exception.
+`parse` returns an AST on success, otherwise it throws an exception. A complete, runnable Node version of the above program is in the `examples/simple` directory. To run it:
+
+```
+$ cd example/simple
+$ npm install
+$ npm run build
+$ npm run start
+```
+
+which prints something like:
+
+```typescript
+{
+  "tag": "ReferenceExpr",
+  "path": "",
+  "workbookName": "",
+  "worksheetName": "",
+  "name": "COUNTIFS",
+  "args": [
+    {
+      "tag": "ReferenceExpr",
+      "path": "",
+      "workbookName": "",
+      "worksheetName": "",
+      "rng": {
+        "regions": [
+          [
+            {
+              "row": 5,
+              "column": 3,
+              "rowMode": {"kind": "RelativeAddress"},
+              "colMode": {"kind": "RelativeAddress"},
+              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+            },
+            {
+              "row": 14,
+              "column": 3,
+              "rowMode": {"kind": "RelativeAddress"},
+              "colMode": {"kind": "RelativeAddress"},
+              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "tag": "ReferenceExpr",
+      "path": "",
+      "workbookName": "",
+      "worksheetName": "",
+      "value": "red"
+    },
+    {
+      "tag": "ReferenceExpr",
+      "path": "",
+      "workbookName": "",
+      "worksheetName": "",
+      "rng": {
+        "regions": [
+          [
+            {
+              "row": 5,
+              "column": 4,
+              "rowMode": {"kind": "RelativeAddress"},
+              "colMode": {"kind": "RelativeAddress"},
+              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+            },
+            {
+              "row": 14,
+              "column": 4,
+              "rowMode": {"kind": "RelativeAddress"},
+              "colMode": {"kind": "RelativeAddress"},
+              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "tag": "ReferenceExpr",
+      "path": "",
+      "workbookName": "",
+      "worksheetName": "",
+      "value": "tx"
+    }
+  ],
+  "arity": {"num": 2}
+}
+```
 
 ## Partial Parses (coming soon)
 

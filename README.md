@@ -38,73 +38,99 @@ which prints something like:
 
 ```typescript
 {
-  "tag": "ReferenceFunction",
+  "tag": "FunctionApplication",
   "path": "",
   "workbookName": "",
   "worksheetName": "",
   "name": "COUNTIFS",
   "args": [
     {
-      "tag": "ReferenceExpr",
+      "tag": "ReferenceRange",
       "path": "",
       "workbookName": "",
       "worksheetName": "",
       "rng": {
+        "tag": "Range",
         "regions": [
           [
             {
+              "tag": "Address",
               "row": 5,
               "column": 3,
-              "rowMode": {"kind": "RelativeAddress"},
-              "colMode": {"kind": "RelativeAddress"},
-              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+              "rowMode": {"tag": "RelativeAddress"},
+              "colMode": {"tag": "RelativeAddress"},
+              "env": {
+                "tag": "Env",
+                "path": "",
+                "workbookName": "",
+                "worksheetName": ""
+              }
             },
             {
+              "tag": "Address",
               "row": 14,
               "column": 3,
-              "rowMode": {"kind": "RelativeAddress"},
-              "colMode": {"kind": "RelativeAddress"},
-              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+              "rowMode": {"tag": "RelativeAddress"},
+              "colMode": {"tag": "RelativeAddress"},
+              "env": {
+                "tag": "Env",
+                "path": "",
+                "workbookName": "",
+                "worksheetName": ""
+              }
             }
           ]
         ]
       }
     },
     {
-      "tag": "ReferenceExpr",
+      "tag": "StringLiteral",
       "path": "",
       "workbookName": "",
       "worksheetName": "",
       "value": "red"
     },
     {
-      "tag": "ReferenceExpr",
+      "tag": "ReferenceRange",
       "path": "",
       "workbookName": "",
       "worksheetName": "",
       "rng": {
+        "tag": "Range",
         "regions": [
           [
             {
+              "tag": "Address",
               "row": 5,
               "column": 4,
-              "rowMode": {"kind": "RelativeAddress"},
-              "colMode": {"kind": "RelativeAddress"},
-              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+              "rowMode": {"tag": "RelativeAddress"},
+              "colMode": {"tag": "RelativeAddress"},
+              "env": {
+                "tag": "Env",
+                "path": "",
+                "workbookName": "",
+                "worksheetName": ""
+              }
             },
             {
+              "tag": "Address",
               "row": 14,
               "column": 4,
-              "rowMode": {"kind": "RelativeAddress"},
-              "colMode": {"kind": "RelativeAddress"},
-              "env": {"path": "", "workbookName": "", "worksheetName": ""}
+              "rowMode": {"tag": "RelativeAddress"},
+              "colMode": {"tag": "RelativeAddress"},
+              "env": {
+                "tag": "Env",
+                "path": "",
+                "workbookName": "",
+                "worksheetName": ""
+              }
             }
           ]
         ]
       }
     },
     {
-      "tag": "ReferenceExpr",
+      "tag": "StringLiteral",
       "path": "",
       "workbookName": "",
       "worksheetName": "",

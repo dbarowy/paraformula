@@ -36,7 +36,7 @@ $ npm run start
 
 which prints something like:
 
-```typescript
+```json
 {
   "tag": "FunctionApplication",
   "path": "",
@@ -57,8 +57,8 @@ which prints something like:
               "tag": "Address",
               "row": 5,
               "column": 3,
-              "rowMode": {"tag": "RelativeAddress"},
-              "colMode": {"tag": "RelativeAddress"},
+              "rowMode": { "tag": "RelativeAddress" },
+              "colMode": { "tag": "RelativeAddress" },
               "env": {
                 "tag": "Env",
                 "path": "",
@@ -70,8 +70,8 @@ which prints something like:
               "tag": "Address",
               "row": 14,
               "column": 3,
-              "rowMode": {"tag": "RelativeAddress"},
-              "colMode": {"tag": "RelativeAddress"},
+              "rowMode": { "tag": "RelativeAddress" },
+              "colMode": { "tag": "RelativeAddress" },
               "env": {
                 "tag": "Env",
                 "path": "",
@@ -103,8 +103,8 @@ which prints something like:
               "tag": "Address",
               "row": 5,
               "column": 4,
-              "rowMode": {"tag": "RelativeAddress"},
-              "colMode": {"tag": "RelativeAddress"},
+              "rowMode": { "tag": "RelativeAddress" },
+              "colMode": { "tag": "RelativeAddress" },
               "env": {
                 "tag": "Env",
                 "path": "",
@@ -116,8 +116,8 @@ which prints something like:
               "tag": "Address",
               "row": 14,
               "column": 4,
-              "rowMode": {"tag": "RelativeAddress"},
-              "colMode": {"tag": "RelativeAddress"},
+              "rowMode": { "tag": "RelativeAddress" },
+              "colMode": { "tag": "RelativeAddress" },
               "env": {
                 "tag": "Env",
                 "path": "",
@@ -137,7 +137,7 @@ which prints something like:
       "value": "tx"
     }
   ],
-  "arity": {"num": 2}
+  "arity": { "num": 2 }
 }
 ```
 

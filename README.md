@@ -36,108 +36,117 @@ $ npm run start
 
 which prints something like:
 
-```json
+```yaml
 {
   "tag": "FunctionApplication",
   "path": "",
   "workbookName": "",
   "worksheetName": "",
   "name": "COUNTIFS",
-  "args": [
-    {
-      "tag": "ReferenceRange",
-      "path": "",
-      "workbookName": "",
-      "worksheetName": "",
-      "rng": {
-        "tag": "Range",
-        "regions": [
-          [
-            {
-              "tag": "Address",
-              "row": 5,
-              "column": 3,
-              "rowMode": { "tag": "RelativeAddress" },
-              "colMode": { "tag": "RelativeAddress" },
-              "env": {
-                "tag": "Env",
-                "path": "",
-                "workbookName": "",
-                "worksheetName": ""
-              }
-            },
-            {
-              "tag": "Address",
-              "row": 14,
-              "column": 3,
-              "rowMode": { "tag": "RelativeAddress" },
-              "colMode": { "tag": "RelativeAddress" },
-              "env": {
-                "tag": "Env",
-                "path": "",
-                "workbookName": "",
-                "worksheetName": ""
-              }
-            }
-          ]
-        ]
-      }
-    },
-    {
-      "tag": "StringLiteral",
-      "path": "",
-      "workbookName": "",
-      "worksheetName": "",
-      "value": "red"
-    },
-    {
-      "tag": "ReferenceRange",
-      "path": "",
-      "workbookName": "",
-      "worksheetName": "",
-      "rng": {
-        "tag": "Range",
-        "regions": [
-          [
-            {
-              "tag": "Address",
-              "row": 5,
-              "column": 4,
-              "rowMode": { "tag": "RelativeAddress" },
-              "colMode": { "tag": "RelativeAddress" },
-              "env": {
-                "tag": "Env",
-                "path": "",
-                "workbookName": "",
-                "worksheetName": ""
-              }
-            },
-            {
-              "tag": "Address",
-              "row": 14,
-              "column": 4,
-              "rowMode": { "tag": "RelativeAddress" },
-              "colMode": { "tag": "RelativeAddress" },
-              "env": {
-                "tag": "Env",
-                "path": "",
-                "workbookName": "",
-                "worksheetName": ""
-              }
-            }
-          ]
-        ]
-      }
-    },
-    {
-      "tag": "StringLiteral",
-      "path": "",
-      "workbookName": "",
-      "worksheetName": "",
-      "value": "tx"
-    }
-  ],
-  "arity": { "num": 2 }
+  "args":
+    [
+      {
+        "tag": "ReferenceRange",
+        "path": "",
+        "workbookName": "",
+        "worksheetName": "",
+        "rng":
+          {
+            "tag": "Range",
+            "regions":
+              [
+                [
+                  {
+                    "tag": "Address",
+                    "row": 5,
+                    "column": 3,
+                    "rowMode": { "tag": "RelativeAddress" },
+                    "colMode": { "tag": "RelativeAddress" },
+                    "env":
+                      {
+                        "tag": "Env",
+                        "path": "",
+                        "workbookName": "",
+                        "worksheetName": "",
+                      },
+                  },
+                  {
+                    "tag": "Address",
+                    "row": 14,
+                    "column": 3,
+                    "rowMode": { "tag": "RelativeAddress" },
+                    "colMode": { "tag": "RelativeAddress" },
+                    "env":
+                      {
+                        "tag": "Env",
+                        "path": "",
+                        "workbookName": "",
+                        "worksheetName": "",
+                      },
+                  },
+                ],
+              ],
+          },
+      },
+      {
+        "tag": "StringLiteral",
+        "path": "",
+        "workbookName": "",
+        "worksheetName": "",
+        "value": "red",
+      },
+      {
+        "tag": "ReferenceRange",
+        "path": "",
+        "workbookName": "",
+        "worksheetName": "",
+        "rng":
+          {
+            "tag": "Range",
+            "regions":
+              [
+                [
+                  {
+                    "tag": "Address",
+                    "row": 5,
+                    "column": 4,
+                    "rowMode": { "tag": "RelativeAddress" },
+                    "colMode": { "tag": "RelativeAddress" },
+                    "env":
+                      {
+                        "tag": "Env",
+                        "path": "",
+                        "workbookName": "",
+                        "worksheetName": "",
+                      },
+                  },
+                  {
+                    "tag": "Address",
+                    "row": 14,
+                    "column": 4,
+                    "rowMode": { "tag": "RelativeAddress" },
+                    "colMode": { "tag": "RelativeAddress" },
+                    "env":
+                      {
+                        "tag": "Env",
+                        "path": "",
+                        "workbookName": "",
+                        "worksheetName": "",
+                      },
+                  },
+                ],
+              ],
+          },
+      },
+      {
+        "tag": "StringLiteral",
+        "path": "",
+        "workbookName": "",
+        "worksheetName": "",
+        "value": "tx",
+      },
+    ],
+  "arity": { "num": 2 },
 }
 ```
 

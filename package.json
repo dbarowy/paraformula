@@ -1,12 +1,13 @@
 {
   "name": "paraformula",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "An Excel formula language parser, written in Typescript",
-  "main": "./dist/src/paraformula.js",
-  "types": "./dist/src/paraformula.d.ts",
+  "main": "./dist/paraformula.js",
+  "types": "./dist/paraformula.d.ts",
   "scripts": {
     "test": "mocha -r ts-node/register test/*.spec.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "clean": "rimraf dist node_modules"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
     "@types/node": "^14.14.37",
     "chai": "^4.3.4",
     "mocha": "^8.3.2",
+    "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
   }

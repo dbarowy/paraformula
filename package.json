@@ -1,6 +1,6 @@
 {
   "name": "paraformula",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "An Excel formula language parser, written in Typescript",
   "main": "./dist/paraformula.js",
   "types": "./dist/paraformula.d.ts",

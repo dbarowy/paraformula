@@ -1049,10 +1049,11 @@ describe("constant", () => {
     }
   });
 
-  it("should parse a number ending with a % sign", () => {
+  it("should parse the percent sign at the end of a number", () => {
+    // because it should acutally be handed by the unary operator parser
     const input = new CU.CharStream("123%");
     const output = PRF.constant(input);
-    const expected = new AST.Number(PP.EnvStub, 1.23);
+    const expected = new AST.Number(PP.EnvStub, 123);
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1991,6 +1992,22 @@ describe("binOp", () => {
           )
         )
       )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should parse a percentage expression like 2%", () => {
+    const input = new CU.CharStream("2%");
+    const output = PE.binOp(PR.rangeAny)(input);
+    const expected = new AST.UnaryOpExpression(
+      "%",
+      new AST.Number(PP.EnvStub, 2)
     );
     switch (output.tag) {
       case "success":

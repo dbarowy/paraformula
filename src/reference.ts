@@ -267,14 +267,8 @@ export module Reference {
   /**
    * Parses a constant.
    */
-  export const constant = P.choice<AST.ReferenceExpr>(
-    // if the number ends with a % sign
-    P.pipe<number, AST.Number>(
-      P.left<number, CU.CharStream>(P.float)(P.char("%"))
-    )((n) => new AST.Number(PP.EnvStub, n / 100))
-  )(
-    // an ordinary number
-    P.pipe<number, AST.Number>(P.float)((n) => new AST.Number(PP.EnvStub, n))
+  export const constant = P.pipe<number, AST.Number>(P.float)(
+    (n) => new AST.Number(PP.EnvStub, n)
   );
 
   /**

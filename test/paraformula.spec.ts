@@ -1929,6 +1929,77 @@ describe("binOp", () => {
         assert.fail();
     }
   });
+
+  it("should parse an exponentiation expression like A1^2", () => {
+    const input = new CU.CharStream("A1^2");
+    const output = PE.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "^",
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      ),
+      new AST.Number(PP.EnvStub, 2)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should correctly parse exponentiation as right-associative as in A1^(1-2)^B2", () => {
+    const input = new CU.CharStream("A1^(1-2)^B2");
+    const output = PE.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "^",
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      ),
+      new AST.BinOpExpression(
+        "^",
+        new AST.ParensExpr(
+          new AST.BinOpExpression(
+            "-",
+            new AST.Number(PP.EnvStub, 1),
+            new AST.Number(PP.EnvStub, 2)
+          )
+        ),
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            2,
+            2,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        )
+      )
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
 });
 
 describe("parse", () => {

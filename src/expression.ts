@@ -1,3 +1,4 @@
+import { debug } from "console";
 import { Primitives as P, CharUtil as CU } from "parsecco";
 import { AST } from "./ast";
 import { Primitives as PP } from "./primitives";
@@ -30,6 +31,15 @@ export module Expression {
   }
 
   /**
+   * Level 4: exponentiation (^)
+   */
+  class PrecedenceLevel4 extends PrecedenceClass {
+    tag = "precedencelevel4";
+    constructor(e: AST.Expression) {
+      super("^", e);
+    }
+  }
+  /**
    * Level 5: addition (+) and subtraction (-)
    */
   class PrecedenceLevel5 extends PrecedenceClass {
@@ -58,92 +68,129 @@ export module Expression {
     tag = "precedencelevel8";
   }
 
+  function exponent(R: P.IParser<AST.Range>) {
+    return P.debug(
+      // exponent MUST consume something
+      (istream: CU.CharStream) => {
+        const input = istream;
+        return P.pipe2<AST.Expression, CU.CharStream, PrecedenceLevel4>(
+          level1(R)
+        )(PP.wsPad(P.char("^")))((e, op) => {
+          const p = new PrecedenceLevel4(e);
+          return p;
+        })(input);
+      }
+    )("exponent");
+  }
+
   function mult(R: P.IParser<AST.Range>) {
     // mult MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("*"))
-    )(level1(R))((sign, e) => e);
+    )(level4(R))((op, e) => e);
   }
 
   function divide(R: P.IParser<AST.Range>) {
     // divide MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("/"))
-    )(level1(R))((sign, e) => e);
+    )(level4(R))((op, e) => e);
   }
 
   function plus(R: P.IParser<AST.Range>) {
     // plus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("+"))
-    )(level5(R))((sign, e) => e);
+    )(level5(R))((op, e) => e);
   }
 
   function minus(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("-"))
-    )(level5(R))((sign, e) => e);
+    )(level5(R))((op, e) => e);
   }
 
   function concatenation(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("&"))
-    )(level6(R))((sign, e) => e);
+    )(level6(R))((op, e) => e);
   }
 
   function equalTo(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("="))
-    )(level7(R))((sign, e) => e);
+    )(level7(R))((op, e) => e);
   }
 
   function notEqualTo(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.str("<>"))
-    )(level7(R))((sign, e) => e);
+    )(level7(R))((siopgn, e) => e);
   }
 
   function greaterThan(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char(">"))
-    )(level7(R))((sign, e) => e);
+    )(level7(R))((op, e) => e);
   }
 
   function lessThan(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("<"))
-    )(level7(R))((sign, e) => e);
+    )(level7(R))((op, e) => e);
   }
 
   function lessThanOrEqualTo(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.str("<="))
-    )(level7(R))((sign, e) => e);
+    )(level7(R))((sopign, e) => e);
   }
 
   function greaterThanOrEqualTo(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.str(">="))
-    )(level7(R))((sign, e) => e);
+    )(level7(R))((op, e) => e);
   }
 
   function level1(R: P.IParser<AST.Range>) {
-    // we now MUST consume something
-    return P.choice<AST.Expression>(
-      // try a parenthesized expression
-      exprParens(R)
-    )(
-      // barring that, try a simple (i.e., nonrecursive) expression
-      exprSimple(R)
-    );
+    return P.debug(
+      // we now MUST consume something
+      P.choice<AST.Expression>(
+        // try a parenthesized expression
+        exprParens(R)
+      )(
+        // barring that, try a simple (i.e., nonrecursive) expression
+        exprSimple(R)
+      )
+    )("level1");
+  }
+
+  /**
+   * Parses right-associative exponentiation expressions.
+   * @param R A Range parser.
+   */
+  function level4(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
+    return P.pipe2<PrecedenceLevel4[], AST.Expression, AST.Expression>(
+      P.many(exponent(R))
+    )(level1(R))((es, e) => {
+      if (es.length > 0) {
+        const exps = rev(es).reduce((acc, lhs) => {
+          const exp = new AST.BinOpExpression(lhs.op, lhs.expr, acc);
+          return exp;
+        }, e);
+        return exps;
+      } else {
+        return e;
+      }
+    });
   }
 
   /**
@@ -153,7 +200,7 @@ export module Expression {
   function level5(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
     return P.prefix<AST.Expression, PrecedenceLevel5[]>(
       // first the term
-      level1(R)
+      level4(R)
     )(
       // then the operation and another term
       P.many1(
@@ -297,7 +344,7 @@ export module Expression {
    * are followed.
    */
   export function binOp(R: P.IParser<AST.Range>) {
-    return P.choice(unary(R))(level8(R));
+    return P.debug(P.choice(unary(R))(level8(R)))("binOp");
   }
 
   /**
@@ -571,13 +618,15 @@ export module Expression {
    * @returns
    */
   export function exprParens(R: P.IParser<AST.Range>) {
-    return P.between<CU.CharStream, CU.CharStream, AST.ParensExpr>(P.char("("))(
-      P.char(")")
-    )(
-      P.pipe<AST.Expression, AST.ParensExpr>(expr(R))(
-        (e) => new AST.ParensExpr(e)
+    return P.debug(
+      P.between<CU.CharStream, CU.CharStream, AST.ParensExpr>(P.char("("))(
+        P.char(")")
+      )(
+        P.pipe<AST.Expression, AST.ParensExpr>(expr(R))(
+          (e) => new AST.ParensExpr(e)
+        )
       )
-    );
+    )("exprParens");
   }
 
   /**
@@ -592,7 +641,9 @@ export module Expression {
    * @param R A range parser.
    */
   export function exprSimple(R: P.IParser<AST.Range>) {
-    return P.choice<AST.Expression>(exprAtom(R))(exprParens(R));
+    return P.debug(P.choice<AST.Expression>(exprAtom(R))(exprParens(R)))(
+      "exprSimple"
+    );
   }
 
   /**
@@ -600,5 +651,5 @@ export module Expression {
    * @param R A range parser.
    */
   exprImpl.contents = (R: P.IParser<AST.Range>) =>
-    P.choice(exprSimple(R))(binOp(R));
+    P.debug(P.choice(binOp(R))(exprSimple(R)))("expr");
 }

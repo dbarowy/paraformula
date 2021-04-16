@@ -107,6 +107,20 @@ export module Expression {
     )(level7(R))((sign, e) => e);
   }
 
+  function greaterThan(R: P.IParser<AST.Range>) {
+    // minus MUST consume something
+    return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
+      PP.wsPad(P.char(">"))
+    )(level7(R))((sign, e) => e);
+  }
+
+  function lessThan(R: P.IParser<AST.Range>) {
+    // minus MUST consume something
+    return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
+      PP.wsPad(P.char("<"))
+    )(level7(R))((sign, e) => e);
+  }
+
   function lessThanOrEqualTo(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
@@ -234,14 +248,20 @@ export module Expression {
           P.pipe<AST.Expression, PrecedenceLevel8>(equalTo(R))(
             (e) => new PrecedenceLevel8("=", e)
           ),
-          P.pipe<AST.Expression, PrecedenceLevel8>(notEqualTo(R))(
-            (e) => new PrecedenceLevel8("<>", e)
+          P.pipe<AST.Expression, PrecedenceLevel8>(lessThan(R))(
+            (e) => new PrecedenceLevel8("<", e)
+          ),
+          P.pipe<AST.Expression, PrecedenceLevel8>(greaterThan(R))(
+            (e) => new PrecedenceLevel8(">", e)
           ),
           P.pipe<AST.Expression, PrecedenceLevel8>(lessThanOrEqualTo(R))(
             (e) => new PrecedenceLevel8("<=", e)
           ),
           P.pipe<AST.Expression, PrecedenceLevel8>(greaterThanOrEqualTo(R))(
             (e) => new PrecedenceLevel8(">=", e)
+          ),
+          P.pipe<AST.Expression, PrecedenceLevel8>(notEqualTo(R))(
+            (e) => new PrecedenceLevel8("<>", e)
           )
         )
       )

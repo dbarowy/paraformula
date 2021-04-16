@@ -1869,6 +1869,66 @@ describe("binOp", () => {
         assert.fail();
     }
   });
+
+  it('should parse a comparison expression like "foo"<>"bar"', () => {
+    const input = new CU.CharStream('"foo"<>"bar"');
+    const output = PE.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "<>",
+      new AST.StringLiteral(PP.EnvStub, "foo"),
+      new AST.StringLiteral(PP.EnvStub, "bar")
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should parse a comparison expression like 1=2", () => {
+    const input = new CU.CharStream("1=2");
+    const output = PE.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "=",
+      new AST.Number(PP.EnvStub, 1),
+      new AST.Number(PP.EnvStub, 2)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+
+  it("should parse a comparison expression like A1>2", () => {
+    const input = new CU.CharStream("A1>2");
+    const output = PE.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      ">",
+      new AST.ReferenceAddress(
+        PP.EnvStub,
+        new AST.Address(
+          1,
+          1,
+          AST.RelativeAddress,
+          AST.RelativeAddress,
+          PP.EnvStub
+        )
+      ),
+      new AST.Number(PP.EnvStub, 2)
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
 });
 
 describe("parse", () => {

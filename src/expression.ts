@@ -14,66 +14,114 @@ export module Expression {
     AST.Expression
   >();
 
-  type Addend = Plus | Sub;
-  class Plus {
-    tag: "plus" = "plus";
-    expr: AST.Expression;
-    constructor(e: AST.Expression) {
+  /*
+   * The following classes represent partial function parses
+   * for Excel operator precedence classes listed here:
+   * https://support.microsoft.com/en-us/office/calculation-operators-and-precedence-in-excel-48be406d-4975-4d31-b2b8-7af9e0e2878a
+   */
+  abstract class PrecedenceClass {
+    tag = "precedenceclass";
+    public readonly op: string;
+    public readonly expr: AST.Expression;
+    constructor(op: string, e: AST.Expression) {
+      this.op = op;
       this.expr = e;
     }
   }
-  class Sub {
-    tag: "sub" = "sub";
-    expr: AST.Expression;
+
+  /**
+   * Level 5: addition (+) and subtraction (-)
+   */
+  class PrecedenceLevel5 extends PrecedenceClass {
+    tag = "precedencelevel5";
+  }
+  /**
+   * Level 6: multiplication (*) and division (/)
+   */
+  class PrecedenceLevel6 extends PrecedenceClass {
+    tag = "precedencelevel6";
+  }
+  /**
+   * Level 7: concatenation (&)
+   */
+  class PrecedenceLevel7 extends PrecedenceClass {
+    tag = "precedencelevel7";
     constructor(e: AST.Expression) {
-      this.expr = e;
+      super("&", e);
     }
   }
-  type Multiplicand = Mult | Div;
-  class Mult {
-    tag: "mult" = "mult";
-    expr: AST.Expression;
-    constructor(e: AST.Expression) {
-      this.expr = e;
-    }
-  }
-  class Div {
-    tag: "div" = "div";
-    expr: AST.Expression;
-    constructor(e: AST.Expression) {
-      this.expr = e;
-    }
+  /**
+   * Level 7: equal to(=), not equal to (<>), less than or equal to (<=),
+   *          and greater than or equal to (>=).
+   */
+  class PrecedenceLevel8 extends PrecedenceClass {
+    tag = "precedencelevel8";
   }
 
   function mult(R: P.IParser<AST.Range>) {
     // mult MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("*"))
-    )(factor(R))((sign, e) => e);
+    )(level1(R))((sign, e) => e);
   }
 
   function divide(R: P.IParser<AST.Range>) {
     // divide MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("/"))
-    )(factor(R))((sign, e) => e);
+    )(level1(R))((sign, e) => e);
   }
 
   function plus(R: P.IParser<AST.Range>) {
     // plus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("+"))
-    )(multiplicand(R))((sign, e) => e);
+    )(level5(R))((sign, e) => e);
   }
 
   function minus(R: P.IParser<AST.Range>) {
     // minus MUST consume something
     return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
       PP.wsPad(P.char("-"))
-    )(multiplicand(R))((sign, e) => e);
+    )(level5(R))((sign, e) => e);
   }
 
-  function factor(R: P.IParser<AST.Range>) {
+  function concatenation(R: P.IParser<AST.Range>) {
+    // minus MUST consume something
+    return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
+      PP.wsPad(P.char("&"))
+    )(level6(R))((sign, e) => e);
+  }
+
+  function equalTo(R: P.IParser<AST.Range>) {
+    // minus MUST consume something
+    return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
+      PP.wsPad(P.char("="))
+    )(level7(R))((sign, e) => e);
+  }
+
+  function notEqualTo(R: P.IParser<AST.Range>) {
+    // minus MUST consume something
+    return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
+      PP.wsPad(P.str("<>"))
+    )(level7(R))((sign, e) => e);
+  }
+
+  function lessThanOrEqualTo(R: P.IParser<AST.Range>) {
+    // minus MUST consume something
+    return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
+      PP.wsPad(P.str("<="))
+    )(level7(R))((sign, e) => e);
+  }
+
+  function greaterThanOrEqualTo(R: P.IParser<AST.Range>) {
+    // minus MUST consume something
+    return P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(
+      PP.wsPad(P.str(">="))
+    )(level7(R))((sign, e) => e);
+  }
+
+  function level1(R: P.IParser<AST.Range>) {
     // we now MUST consume something
     return P.choice<AST.Expression>(
       // try a parenthesized expression
@@ -88,30 +136,30 @@ export module Expression {
    * Parses left-associative multiplication or division expressions.
    * @param R A Range parser.
    */
-  function multiplicand(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
-    return P.prefix<AST.Expression, Multiplicand[]>(
+  function level5(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
+    return P.prefix<AST.Expression, PrecedenceLevel5[]>(
       // first the term
-      factor(R)
+      level1(R)
     )(
       // then the operation and another term
       P.many1(
         P.choice(
-          P.pipe<AST.Expression, Multiplicand>(mult(R))((e) => new Mult(e))
-        )(P.pipe<AST.Expression, Multiplicand>(divide(R))((e) => new Div(e)))
+          P.pipe<AST.Expression, PrecedenceLevel5>(mult(R))(
+            (e) => new PrecedenceLevel5("*", e)
+          )
+        )(
+          P.pipe<AST.Expression, PrecedenceLevel5>(divide(R))(
+            (e) => new PrecedenceLevel5("/", e)
+          )
+        )
       )
     )(
       // yields a binop from a list of multiplicands
-      (t1, t2) => {
-        const aexprs = t2.reduce((acc, rhs) => {
-          switch (rhs.tag) {
-            case "mult":
-              return new AST.BinOpExpression("*", acc, rhs.expr);
-            case "div":
-              return new AST.BinOpExpression("/", acc, rhs.expr);
-          }
-        }, t1);
-        return aexprs;
-      }
+      (t1, t2) =>
+        t2.reduce(
+          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
+          t1
+        )
     );
   }
 
@@ -119,30 +167,91 @@ export module Expression {
    * Parses left-associative addition or subtraction expressions.
    * @param R A Range parser.
    */
-  function addend(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
-    return P.prefix<AST.Expression, Addend[]>(
+  function level6(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
+    return P.prefix<AST.Expression, PrecedenceLevel6[]>(
       // first the term
-      multiplicand(R)
+      level5(R)
     )(
       // then the operation and another term
       P.many1(
-        P.choice(P.pipe<AST.Expression, Addend>(plus(R))((e) => new Plus(e)))(
-          P.pipe<AST.Expression, Addend>(minus(R))((e) => new Sub(e))
+        P.choice(
+          P.pipe<AST.Expression, PrecedenceLevel6>(plus(R))(
+            (e) => new PrecedenceLevel6("+", e)
+          )
+        )(
+          P.pipe<AST.Expression, PrecedenceLevel6>(minus(R))(
+            (e) => new PrecedenceLevel6("-", e)
+          )
         )
       )
     )(
       // yields a binop from a list of addends
-      (t1, t2) => {
-        const aexprs = t2.reduce((acc, rhs) => {
-          switch (rhs.tag) {
-            case "plus":
-              return new AST.BinOpExpression("+", acc, rhs.expr);
-            case "sub":
-              return new AST.BinOpExpression("-", acc, rhs.expr);
-          }
-        }, t1);
-        return aexprs;
-      }
+      (t1, t2) =>
+        t2.reduce(
+          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
+          t1
+        )
+    );
+  }
+
+  /**
+   * Parses left-associative concatenation expressions.
+   * @param R A Range parser.
+   */
+  function level7(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
+    return P.prefix<AST.Expression, PrecedenceLevel7[]>(
+      // first the term
+      level6(R)
+    )(
+      // then the operation and another term
+      P.many1(
+        P.pipe<AST.Expression, PrecedenceLevel7>(concatenation(R))(
+          (e) => new PrecedenceLevel7(e)
+        )
+      )
+    )(
+      // yields a binop from a list of addends
+      (t1, t2) =>
+        t2.reduce(
+          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
+          t1
+        )
+    );
+  }
+
+  /**
+   * Parses left-associative comparison expressions.
+   * @param R A Range parser.
+   */
+  function level8(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
+    return P.prefix<AST.Expression, PrecedenceLevel8[]>(
+      // first the term
+      level7(R)
+    )(
+      // then the operation and another term
+      P.many1(
+        P.choices(
+          P.pipe<AST.Expression, PrecedenceLevel8>(equalTo(R))(
+            (e) => new PrecedenceLevel8("=", e)
+          ),
+          P.pipe<AST.Expression, PrecedenceLevel8>(notEqualTo(R))(
+            (e) => new PrecedenceLevel8("<>", e)
+          ),
+          P.pipe<AST.Expression, PrecedenceLevel8>(lessThanOrEqualTo(R))(
+            (e) => new PrecedenceLevel8("<=", e)
+          ),
+          P.pipe<AST.Expression, PrecedenceLevel8>(greaterThanOrEqualTo(R))(
+            (e) => new PrecedenceLevel8(">=", e)
+          )
+        )
+      )
+    )(
+      // yields a binop from a list of addends
+      (t1, t2) =>
+        t2.reduce(
+          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
+          t1
+        )
     );
   }
 
@@ -168,7 +277,7 @@ export module Expression {
    * are followed.
    */
   export function binOp(R: P.IParser<AST.Range>) {
-    return P.choice(unary(R))(addend(R));
+    return P.choice(unary(R))(level8(R));
   }
 
   /**

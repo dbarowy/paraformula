@@ -1852,6 +1852,23 @@ describe("binOp", () => {
         assert.fail();
     }
   });
+
+  it('should parse a concatenation expression like "foo"&"bar"', () => {
+    const input = new CU.CharStream('"foo"&"bar"');
+    const output = PE.binOp(PR.rangeAny)(input);
+    const expected = new AST.BinOpExpression(
+      "&",
+      new AST.StringLiteral(PP.EnvStub, "foo"),
+      new AST.StringLiteral(PP.EnvStub, "bar")
+    );
+    switch (output.tag) {
+      case "success":
+        expect(output.result).to.eql(expected);
+        break;
+      default:
+        assert.fail();
+    }
+  });
 });
 
 describe("parse", () => {

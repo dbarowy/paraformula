@@ -22,39 +22,4 @@ export module Util {
     }
     return cti(col.length - 1);
   }
-
-  /**
-   * This helper function sorts strings from
-   * longest length to shortest length; length
-   * ties are sorted lexicographically; ensures
-   * that a substring is never matched, consumed,
-   * and then returned to the calling parser which
-   * then fails.
-   * @param sa An array of strings.
-   * @returns A sorted array of strings.
-   */
-  function longestMatchFirst(sa: string[]): string[] {
-    const arr = sa.slice(); // make a copy
-    arr.sort((s1, s2) => {
-      if (s1.length < s2.length) {
-        return 1;
-      } else if (s1.length === s2.length) {
-        return s1.localeCompare(s2);
-      } else {
-        return -1;
-      }
-    });
-    process.stdout.write(JSON.stringify(arr) + "\n");
-    return arr;
-  }
-
-  /**
-   * Parses a large set of string alternatives.
-   * @param ss An array of strings
-   */
-  export function strAlternatives(ss: string[]): P.IParser<CU.CharStream> {
-    const parsers = ss.map((s) => P.str(s));
-    const p = P.choices<CU.CharStream>(...parsers);
-    return p;
-  }
 }

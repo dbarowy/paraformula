@@ -1110,20 +1110,6 @@ describe("booleanLiteral", () => {
   });
 });
 
-describe("strAlternatives", () => {
-  it("should succeed on something", () => {
-    const input = new CU.CharStream("on");
-    const output = Util.strAlternatives(["on", "off"])(input);
-    switch (output.tag) {
-      case "success":
-        expect(output.result.toString()).to.equal("on");
-        break;
-      case "failure":
-        assert.fail();
-    }
-  });
-});
-
 describe("varArgsFunctionName", () => {
   it("should succeed on SUM", () => {
     const input = new CU.CharStream("SUM");

@@ -882,78 +882,72 @@ export module ReservedWords {
   /**
    * Parses function names that take no arguments.
    */
-  export const arity0FunctionName = Util.strAlternatives(Arity0Names);
+  export const arity0FunctionName = P.strSat(Arity0Names);
 
   /**
    * Parses function names that take one arguments.
    */
-  export const arity1FunctionName = Util.strAlternatives(Arity1Names);
+  export const arity1FunctionName = P.strSat(Arity1Names);
 
   /**
    * Parses function names that take two arguments.
    */
-  export const arity2FunctionName = Util.strAlternatives(Arity2Names);
+  export const arity2FunctionName = P.strSat(Arity2Names);
 
   /**
    * Parses function names that take three arguments.
    */
-  export const arity3FunctionName = Util.strAlternatives(Arity3Names);
+  export const arity3FunctionName = P.strSat(Arity3Names);
 
   /**
    * Parses function names that take four arguments.
    */
-  export const arity4FunctionName = Util.strAlternatives(Arity4Names);
+  export const arity4FunctionName = P.strSat(Arity4Names);
 
   /**
    * Parses function names that take five arguments.
    */
-  export const arity5FunctionName = Util.strAlternatives(Arity5Names);
+  export const arity5FunctionName = P.strSat(Arity5Names);
 
   /**
    * Parses function names that take six arguments.
    */
-  export const arity6FunctionName = Util.strAlternatives(Arity6Names);
+  export const arity6FunctionName = P.strSat(Arity6Names);
 
   /**
    * Parses function names that take seven arguments.
    */
-  export const arity7FunctionName = Util.strAlternatives(Arity7Names);
+  export const arity7FunctionName = P.strSat(Arity7Names);
 
   /**
    * Parses function names that take eight arguments.
    */
-  export const arity8FunctionName = Util.strAlternatives(Arity8Names);
+  export const arity8FunctionName = P.strSat(Arity8Names);
 
   /**
    * Parses function names that take nine arguments.
    */
-  export const arity9FunctionName = Util.strAlternatives(Arity9Names);
+  export const arity9FunctionName = P.strSat(Arity9Names);
 
   /**
    * Parses function names that take at least one argument.
    */
-  export const arityAtLeast1FunctionName = Util.strAlternatives(
-    ArityAtLeast1Names
-  );
+  export const arityAtLeast1FunctionName = P.strSat(ArityAtLeast1Names);
 
   /**
    * Parses function names that take at least two arguments.
    */
-  export const arityAtLeast2FunctionName = Util.strAlternatives(
-    ArityAtLeast2Names
-  );
+  export const arityAtLeast2FunctionName = P.strSat(ArityAtLeast2Names);
 
   /**
    * Parses function names that take at least three arguments.
    */
-  export const arityAtLeast3FunctionName = Util.strAlternatives(
-    ArityAtLeast3Names
-  );
+  export const arityAtLeast3FunctionName = P.strSat(ArityAtLeast3Names);
 
   /**
    * Parses function names that take any number of arguments.
    */
-  export const varArgsFunctionName = Util.strAlternatives(VarArgsNames);
+  export const varArgsFunctionName = P.strSat(VarArgsNames);
 
   /**
    * Fails if any reserved word is encountered, succeeds otherwise.

@@ -433,11 +433,11 @@ export module Expression {
    * @param ch The character to check.
    */
   export function isAlphaNum(ch: string): boolean {
-    return (
-      (ch.charCodeAt(0) > 48 && ch.charCodeAt(0) < 58) ||
-      (ch.charCodeAt(0) > 65 && ch.charCodeAt(0) < 91) ||
-      (ch.charCodeAt(0) > 97 && ch.charCodeAt(0) < 123)
-    );
+    const result =
+      (ch.charCodeAt(0) >= 48 && ch.charCodeAt(0) <= 57) ||
+      (ch.charCodeAt(0) >= 65 && ch.charCodeAt(0) <= 90) ||
+      (ch.charCodeAt(0) >= 97 && ch.charCodeAt(0) <= 122);
+    return result;
   }
 
   /**
@@ -457,7 +457,7 @@ export module Expression {
   ): P.IParser<AST.FunctionApplication> {
     return P.bind<CU.CharStream, AST.FunctionApplication>(
       // first parse the function name
-      P.left<CU.CharStream, CU.CharStream>(functionName)(P.char(")"))
+      P.left<CU.CharStream, CU.CharStream>(functionName)(P.char("("))
     )((nameCS) => {
       // what happens next depends on the arity associated with the name
       const name = nameCS.toString();
@@ -465,7 +465,7 @@ export module Expression {
         case "fixed" /* fixed arity */: {
           const fixedArities = PRW.arityFixed.get(name)!;
           const next = P.left<AST.Expression[], CU.CharStream>(
-            sepBy1(expr(R))(PP.Comma)
+            sepBy(expr(R))(PP.Comma)
           )(P.char(")"));
           return P.bind<AST.Expression[], AST.FunctionApplication>(next)(
             (exprs) => {

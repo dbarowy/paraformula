@@ -1,6 +1,6 @@
 {
   "name": "paraformula",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "An Excel formula language parser, written in Typescript",
   "main": "./dist/paraformula.js",
   "types": "./dist/paraformula.d.ts",
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/dbarowy/paraformula#readme",
   "dependencies": {
-    "parsecco": "^1.4.3"
+    "parsecco": "^1.4.4"
   },
   "devDependencies": {
     "@types/chai": "^4.2.16",

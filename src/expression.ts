@@ -429,24 +429,111 @@ export module Expression {
   }
 
   /**
-   * Parses a single function argument expression.
-   * @param R A range parser.
+   * Returns true if the character is alphanumeric (case insensitive).
+   * @param ch The character to check.
    */
-  export function argument(R: P.IParser<AST.Range>) {
-    return P.left<AST.Expression, CU.CharStream>(expr(R))(PP.Comma);
+  export function isAlphaNum(ch: string): boolean {
+    return (
+      (ch.charCodeAt(0) > 48 && ch.charCodeAt(0) < 58) ||
+      (ch.charCodeAt(0) > 65 && ch.charCodeAt(0) < 91) ||
+      (ch.charCodeAt(0) > 97 && ch.charCodeAt(0) < 123)
+    );
   }
 
   /**
-   * Parses a list of `n` argument expressions.
-   * @param R A range parser.
-   * @param n Number of arguments to parse.
+   * Parses a valid function identifier.
    */
-  export function argumentsN(R: P.IParser<AST.Range>) {
-    return (n: number) => {
-      return P.pipe2<AST.Expression[], AST.Expression, AST.Expression[]>(
-        repN(n - 1, argument(R))
-      )(expr(R))((as, a) => rev(cons(a, as)));
-    };
+  export const functionName = P.pipe2<
+    CU.CharStream,
+    CU.CharStream,
+    CU.CharStream
+  >(P.letter)(P.matchWhile(isAlphaNum))((ch, str) => ch.concat(str));
+
+  /**
+   * Parses a function of arbitrary arity.
+   */
+  export function fApply(
+    R: P.IParser<AST.Range>
+  ): P.IParser<AST.FunctionApplication> {
+    return P.bind<CU.CharStream, AST.FunctionApplication>(
+      // first parse the function name
+      P.left<CU.CharStream, CU.CharStream>(functionName)(P.char(")"))
+    )((nameCS) => {
+      // what happens next depends on the arity associated with the name
+      const name = nameCS.toString();
+      switch (PRW.whichArity(name)) {
+        case "fixed" /* fixed arity */: {
+          const fixedArities = PRW.arityFixed.get(name)!;
+          const next = P.left<AST.Expression[], CU.CharStream>(
+            sepBy1(expr(R))(PP.Comma)
+          )(P.char(")"));
+          return P.bind<AST.Expression[], AST.FunctionApplication>(next)(
+            (exprs) => {
+              // is this an arity that we expect?
+              if (!fixedArities.has(exprs.length)) {
+                return P.zero<AST.FunctionApplication>(
+                  "Arity " + fixedArities + " expected for function " + name
+                );
+              }
+              return P.result(
+                new AST.FunctionApplication(
+                  PP.EnvStub,
+                  name,
+                  exprs,
+                  new AST.FixedArity(exprs.length)
+                )
+              );
+            }
+          );
+        }
+        case "atleast": {
+          const atLeastArity = PRW.arityAtLeastN.get(name)!;
+          const next = P.left<AST.Expression[], CU.CharStream>(
+            sepBy1(expr(R))(PP.Comma)
+          )(P.char(")"));
+          return P.bind<AST.Expression[], AST.FunctionApplication>(next)(
+            (exprs) => {
+              // is this an arity that we expect?
+              if (!(exprs.length >= atLeastArity)) {
+                return P.zero<AST.FunctionApplication>(
+                  "Arity " + atLeastArity + " expected for function " + name
+                );
+              }
+              return P.result(
+                new AST.FunctionApplication(
+                  PP.EnvStub,
+                  name,
+                  exprs,
+                  new AST.LowBoundArity(atLeastArity)
+                )
+              );
+            }
+          );
+        }
+        case "any": {
+          const isAnyArity = PRW.arityAny.has(name);
+          const next = P.left<AST.Expression[], CU.CharStream>(
+            sepBy(expr(R))(PP.Comma)
+          )(P.char(")"));
+          return P.bind<AST.Expression[], AST.FunctionApplication>(next)(
+            (exprs) => {
+              return P.result(
+                new AST.FunctionApplication(
+                  PP.EnvStub,
+                  name,
+                  exprs,
+                  AST.VarArgsArityInst
+                )
+              );
+            }
+          );
+        }
+        case "unknown":
+          return P.zero<AST.FunctionApplication>(
+            "Unrecognized function name '" + name + "'"
+          );
+      }
+    });
   }
 
   /**
@@ -459,7 +546,8 @@ export module Expression {
     return (sep: P.IParser<U>) => {
       return P.pipe2<T, T[], T[]>(
         // parse the one
-        P.right<CU.CharStream, T>(PP.Comma)(p)
+        // P.right<CU.CharStream, T>(PP.Comma)(p)
+        p
       )(
         // then the many
         P.many(P.right<U, T>(sep)(p))
@@ -471,137 +559,22 @@ export module Expression {
   }
 
   /**
-   * Parses a list of at least `n` argument expressions.
-   * @param R A range parser.
-   * @param n Minimum number of arguments to parse.
+   * Parses `p` followed by repeated sequences of `sep` and `p`, zero or
+   * more times.
+   * In BNF: `p (sep p)*`.
+   * @param p A parser
+   * @param sep A separator
    */
-  export function argumentsAtLeastN(R: P.IParser<AST.Range>) {
-    return (n: number) => {
-      return P.pipe2<AST.Expression[], AST.Expression[], AST.Expression[]>(
-        argumentsN(R)(n - 1)
+  function sepBy<T, U>(p: P.IParser<T>) {
+    return (sep: P.IParser<U>) => {
+      return P.choice(
+        // parse as many as possible
+        sepBy1(p)(sep)
       )(
-        sepBy1<AST.Expression, CU.CharStream>(expr(R))(PP.Comma)
-      )((prefixArgs, suffixArgs) => prefixArgs.concat(suffixArgs));
-    };
-  }
-
-  /**
-   * Parses a function application of arity n.
-   * @param R Range parser.
-   * @param n Arity.
-   */
-  export function arityNFunction(R: P.IParser<AST.Range>) {
-    return (n: number) => {
-      if (n === 0) {
-        return P.pipe<CU.CharStream, AST.FunctionApplication>(
-          P.left(PRW.arityNName(0))(P.str("()"))
-        )(
-          (name) =>
-            new AST.FunctionApplication(
-              PP.EnvStub,
-              name.toString(),
-              [],
-              new AST.FixedArity(0)
-            )
-        );
-      } else {
-        return P.pipe2<
-          CU.CharStream,
-          AST.Expression[],
-          AST.FunctionApplication
-        >(
-          // parse the function name
-          P.left<CU.CharStream, CU.CharStream>(PRW.arityNName(n))(P.char("("))
-        )(
-          // parse the arguments
-          P.left<AST.Expression[], CU.CharStream>(argumentsN(R)(n))(P.char(")"))
-        )(
-          (name, es) =>
-            new AST.FunctionApplication(
-              PP.EnvStub,
-              name.toString(),
-              es,
-              new AST.FixedArity(n)
-            )
-        );
-      }
-    };
-  }
-
-  /**
-   * Parses a function application of arity at least n.
-   * @param R Range parser.
-   * @param n Arity.
-   */
-  export function arityAtLeastNFunction(R: P.IParser<AST.Range>) {
-    // here, we ignore whatever Range parser we are given
-    // and use rangeContig instead
-    return (n: number) => {
-      return P.pipe2<CU.CharStream, AST.Expression[], AST.FunctionApplication>(
-        // parse the function name
-        P.left<CU.CharStream, CU.CharStream>(PRW.arityAtLeastNName(n))(
-          P.char("(")
-        )
-      )(
-        // parse the arguments
-        P.left<AST.Expression[], CU.CharStream>(
-          argumentsAtLeastN(PR.rangeContig)(n)
-        )(P.char(")"))
-      )(
-        (name, es) =>
-          new AST.FunctionApplication(
-            PP.EnvStub,
-            name.toString(),
-            es,
-            new AST.LowBoundArity(n)
-          )
+        // but none is also OK
+        P.result<T[]>([])
       );
     };
-  }
-
-  /**
-   * Parses a function application of arity at least zero.
-   * @param R Range parser.
-   */
-  export function varArgsFunction(R: P.IParser<AST.Range>) {
-    // here, we ignore whatever Range parser we are given
-    // and use rangeAny instead (i.e., try both)
-    return P.pipe2<CU.CharStream, AST.Expression[], AST.FunctionApplication>(
-      // parse the function name
-      P.left<CU.CharStream, CU.CharStream>(PRW.varArgsFunctionName)(P.char("("))
-    )(
-      // parse the arguments
-      P.left<AST.Expression[], CU.CharStream>(
-        argumentsAtLeastN(PR.rangeAny)(0)
-      )(P.char(")"))
-    )(
-      (name, es) =>
-        new AST.FunctionApplication(
-          PP.EnvStub,
-          name.toString(),
-          es,
-          AST.VarArgsArityInst
-        )
-    );
-  }
-
-  /**
-   * Parses a function of arbitrary arity.
-   */
-  export function fApply(
-    R: P.IParser<AST.Range>
-  ): P.IParser<AST.FunctionApplication> {
-    return P.choices(
-      choicesFrom(
-        fillTo(PRW.arityNNameArray.length).map((e, i) => arityNFunction(R)(i))
-      ),
-      choicesFrom(
-        fillTo(PRW.arityAtLeastNNameArray.length).map((e, i) =>
-          arityAtLeastNFunction(R)(i + 1)
-        )
-      ),
-      varArgsFunction(R)
-    );
   }
 
   /**

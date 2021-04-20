@@ -1202,15 +1202,61 @@ describe("data", () => {
   });
 });
 
-describe("argumentsN", () => {
-  it("should parse an argument list", () => {
-    const input = new CU.CharStream("1, TRUE, henry");
-    const output = PE.argumentsN(PR.rangeAny)(3)(input);
-    const expected = [
-      new AST.Number(PP.EnvStub, 1),
-      new AST.Boolean(PP.EnvStub, true),
-      new AST.ReferenceNamed(PP.EnvStub, "henry"),
-    ];
+describe("fApply", () => {
+  it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
+    const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
+    const output = PE.fApply(PR.rangeAny)(input);
+    const expected = new AST.FunctionApplication(
+      PP.EnvStub,
+      "COUNTIFS",
+      [
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(
+                1,
+                1,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+              new AST.Address(
+                1,
+                1,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+            ],
+          ])
+        ),
+        new AST.StringLiteral(PP.EnvStub, "red"),
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(
+                2,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+              new AST.Address(
+                2,
+                2,
+                AST.RelativeAddress,
+                AST.RelativeAddress,
+                PP.EnvStub
+              ),
+            ],
+          ])
+        ),
+        new AST.StringLiteral(PP.EnvStub, "tx"),
+      ],
+      new AST.FixedArity(2)
+    );
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1219,28 +1265,28 @@ describe("argumentsN", () => {
         assert.fail();
     }
   });
-});
 
-describe("argumentsAtLeastN", () => {
-  it("should parse an argument list", () => {
-    const input = new CU.CharStream("1, TRUE, henry, FALSE, A1");
-    const output = PE.argumentsAtLeastN(PR.rangeAny)(3)(input);
-    const expected = [
-      new AST.Number(PP.EnvStub, 1),
-      new AST.Boolean(PP.EnvStub, true),
-      new AST.ReferenceNamed(PP.EnvStub, "henry"),
-      new AST.Boolean(PP.EnvStub, false),
-      new AST.ReferenceAddress(
-        PP.EnvStub,
-        new AST.Address(
-          1,
-          1,
-          AST.RelativeAddress,
-          AST.RelativeAddress,
-          PP.EnvStub
-        )
-      ),
-    ];
+  it("should parse a more-than-zero-arity function application like CEILING()", () => {
+    const input = new CU.CharStream("CEILING(A1,5)");
+    const output = PE.fApply(PR.rangeAny)(input);
+    const expected = new AST.FunctionApplication(
+      PP.EnvStub,
+      "CEILING",
+      [
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(
+            1,
+            1,
+            AST.RelativeAddress,
+            AST.RelativeAddress,
+            PP.EnvStub
+          )
+        ),
+        new AST.Number(PP.EnvStub, 5),
+      ],
+      new AST.FixedArity(2)
+    );
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1249,12 +1295,10 @@ describe("argumentsAtLeastN", () => {
         assert.fail();
     }
   });
-});
 
-describe("arityNFunction", () => {
   it("should parse a zero-arity function application like RAND()", () => {
     const input = new CU.CharStream("RAND()");
-    const output = PE.arityNFunction(PR.rangeAny)(0)(input);
+    const output = PE.fApply(PR.rangeAny)(input);
     const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "RAND",
@@ -1270,252 +1314,9 @@ describe("arityNFunction", () => {
     }
   });
 
-  it("should parse a more-than-zero-arity function application like CEILING()", () => {
-    const input = new CU.CharStream("CEILING(A1,5)");
-    const output = PE.arityNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.FunctionApplication(
-      PP.EnvStub,
-      "CEILING",
-      [
-        new AST.ReferenceAddress(
-          PP.EnvStub,
-          new AST.Address(
-            1,
-            1,
-            AST.RelativeAddress,
-            AST.RelativeAddress,
-            PP.EnvStub
-          )
-        ),
-        new AST.Number(PP.EnvStub, 5),
-      ],
-      new AST.FixedArity(2)
-    );
-    switch (output.tag) {
-      case "success":
-        expect(output.result).to.eql(expected);
-        break;
-      case "failure":
-        assert.fail();
-    }
-  });
-});
-
-describe("arityAtLeastNFunction", () => {
-  it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
-    const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
-    const output = PE.arityAtLeastNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.FunctionApplication(
-      PP.EnvStub,
-      "COUNTIFS",
-      [
-        new AST.ReferenceRange(
-          PP.EnvStub,
-          new AST.Range([
-            [
-              new AST.Address(
-                1,
-                1,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-              new AST.Address(
-                1,
-                1,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-            ],
-          ])
-        ),
-        new AST.StringLiteral(PP.EnvStub, "red"),
-        new AST.ReferenceRange(
-          PP.EnvStub,
-          new AST.Range([
-            [
-              new AST.Address(
-                2,
-                2,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-              new AST.Address(
-                2,
-                2,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-            ],
-          ])
-        ),
-        new AST.StringLiteral(PP.EnvStub, "tx"),
-      ],
-      new AST.FixedArity(2)
-    );
-    switch (output.tag) {
-      case "success":
-        expect(output.result).to.eql(expected);
-        break;
-      case "failure":
-        assert.fail();
-    }
-  });
-});
-
-describe("varArgsFunction", () => {
   it("should parse a varargs function application like SUM()", () => {
     const input = new CU.CharStream("SUM(A1,B2:B77,5)");
-    const output = PE.varArgsFunction(PR.rangeAny)(input);
-    const expected = new AST.FunctionApplication(
-      PP.EnvStub,
-      "SUM",
-      [
-        new AST.ReferenceAddress(
-          PP.EnvStub,
-          new AST.Address(
-            1,
-            1,
-            AST.RelativeAddress,
-            AST.RelativeAddress,
-            PP.EnvStub
-          )
-        ),
-        new AST.ReferenceRange(
-          PP.EnvStub,
-          new AST.Range([
-            [
-              new AST.Address(
-                2,
-                2,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-              new AST.Address(
-                77,
-                2,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-            ],
-          ])
-        ),
-        new AST.Number(PP.EnvStub, 5),
-      ],
-      AST.VarArgsArityInst
-    );
-    switch (output.tag) {
-      case "success":
-        expect(output.result).to.eql(expected);
-        break;
-      case "failure":
-        assert.fail();
-    }
-  });
-});
-
-describe("fApply", () => {
-  it("should parse a fixed arity function application like CEILING()", () => {
-    const input = new CU.CharStream("CEILING(A1,5)");
-    const output = PE.arityNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.FunctionApplication(
-      PP.EnvStub,
-      "CEILING",
-      [
-        new AST.ReferenceAddress(
-          PP.EnvStub,
-          new AST.Address(
-            1,
-            1,
-            AST.RelativeAddress,
-            AST.RelativeAddress,
-            PP.EnvStub
-          )
-        ),
-        new AST.Number(PP.EnvStub, 5),
-      ],
-      new AST.FixedArity(2)
-    );
-    switch (output.tag) {
-      case "success":
-        expect(output.result).to.eql(expected);
-        break;
-      case "failure":
-        assert.fail();
-    }
-  });
-
-  it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
-    const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
-    const output = PE.arityAtLeastNFunction(PR.rangeAny)(2)(input);
-    const expected = new AST.FunctionApplication(
-      PP.EnvStub,
-      "COUNTIFS",
-      [
-        new AST.ReferenceRange(
-          PP.EnvStub,
-          new AST.Range([
-            [
-              new AST.Address(
-                1,
-                1,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-              new AST.Address(
-                1,
-                1,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-            ],
-          ])
-        ),
-        new AST.StringLiteral(PP.EnvStub, "red"),
-        new AST.ReferenceRange(
-          PP.EnvStub,
-          new AST.Range([
-            [
-              new AST.Address(
-                2,
-                2,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-              new AST.Address(
-                2,
-                2,
-                AST.RelativeAddress,
-                AST.RelativeAddress,
-                PP.EnvStub
-              ),
-            ],
-          ])
-        ),
-        new AST.StringLiteral(PP.EnvStub, "tx"),
-      ],
-      new AST.FixedArity(2)
-    );
-    switch (output.tag) {
-      case "success":
-        expect(output.result).to.eql(expected);
-        break;
-      case "failure":
-        assert.fail();
-    }
-  });
-
-  it("should parse a varargs function application like SUM()", () => {
-    const input = new CU.CharStream("SUM(A1,B2:B77,5)");
-    const output = PE.varArgsFunction(PR.rangeAny)(input);
+    const output = PE.fApply(PR.rangeAny)(input);
     const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "SUM",

@@ -19,12 +19,18 @@ export module Paraformula {
    */
   export function parse(input: string): AST.Expression {
     const cs = new CU.CharStream(input);
-    const output = grammar(cs);
-    switch (output.tag) {
-      case "success":
-        return output.result;
-      case "failure":
-        throw new Error("Unable to parse input: " + output.error_msg);
+    const it = grammar(cs);
+    const elem = it.next();
+    if (elem.done) {
+      const output = elem.value;
+      switch (output.tag) {
+        case "success":
+          return output.result;
+        case "failure":
+          throw new Error("Unable to parse input: " + output.error_msg);
+      }
+    } else {
+      throw new Error("This should never happen.");
     }
   }
 }

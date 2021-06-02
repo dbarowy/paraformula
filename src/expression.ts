@@ -9,10 +9,8 @@ export module Expression {
   /**
    * expr is the top-level parser in the grammar.
    */
-  export let [expr, exprImpl] = P.rec1ArgParser<
-    P.IParser<AST.Range>,
-    AST.Expression
-  >();
+  export let [expr, exprImpl] =
+    P.rec1ArgParser<P.IParser<AST.Range>, AST.Expression>();
 
   /*
    * The following classes represent partial function parses
@@ -406,13 +404,13 @@ export module Expression {
    * @param n Number of times to repeat.
    */
   function repN<T>(n: number, p: P.IParser<T>): P.IParser<T[]> {
-    return (istream: CU.CharStream) => {
+    return function* (istream: CU.CharStream) {
       let input = istream;
       let i = n;
       const results: T[] = [];
       let done = false;
       while (i > 0 && !done) {
-        const output = p(input);
+        const output = yield* p(input);
         switch (output.tag) {
           case "success":
             results.push(output.result);

@@ -14,9 +14,9 @@ export module Reference {
       (s) => new CU.CharStream("'")
     );
     const chars = P.choice(normalChar)(escapedChar);
-    const many1Chars = P.pipe<CU.CharStream[], CU.CharStream>(
-      P.many1(chars)
-    )((cs) => CU.CharStream.concat(cs));
+    const many1Chars = P.pipe<CU.CharStream[], CU.CharStream>(P.many1(chars))(
+      (cs) => CU.CharStream.concat(cs)
+    );
     return P.between<CU.CharStream, CU.CharStream, CU.CharStream>(P.str("'"))(
       P.str("'")
     )(many1Chars);
@@ -311,7 +311,7 @@ export module Reference {
       // are present; the reservedWord parser is a lookahead parser
       // that succeeds, consuming no input, when no reserved words
       // are present at the start of the input stream
-      P.right<AST.ReferenceExpr, AST.ReferenceExpr>(RW.reservedWord)(
+      P.right<undefined, AST.ReferenceExpr>(RW.reservedWord)(
         P.choices(stringLiteral, namedReference)
       )
     );

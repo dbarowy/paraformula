@@ -1449,7 +1449,7 @@ export module ReservedWords {
    * Fails if any reserved word is encountered, succeeds otherwise.
    * Never consumes input.
    */
-  export const reservedWord: P.IParser<AST.ReferenceExpr> = P.fail(
+  export const reservedWord: P.IParser<undefined> = P.fail(
     // the poison pill generic type parameter
     // is purely so that this parser returns
     // a type that is a "reference".
@@ -1471,7 +1471,7 @@ export module ReservedWords {
         varArgsFunctionName
       )
     )((cs) => new AST.PoisonPill(PP.EnvStub))
-  )("Cannot parse a reserved word.") as P.IParser<AST.ReferenceExpr>;
+  )("Cannot parse a reserved word.") as P.IParser<undefined>;
 
   /**
    * An array of all fixed-arity function parsers, indexed by arity.

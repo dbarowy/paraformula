@@ -11,10 +11,13 @@ import { AST } from "../src/ast";
 import { assert, Assertion, expect } from "chai";
 import "mocha";
 
+// instruct mocha to look for generator tests
+require("mocha-generators").install();
+
 describe("Z", () => {
-  it("should consume an integer with a leading plus sign", () => {
+  it("should consume an integer with a leading plus sign", function* () {
     const input = new CU.CharStream("+645");
-    const output = PP.Z(input);
+    const output = yield* PP.Z(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(645);
@@ -23,9 +26,9 @@ describe("Z", () => {
         assert.fail();
     }
   });
-  it("should consume an integer with a leading minus sign", () => {
+  it("should consume an integer with a leading minus sign", function* () {
     const input = new CU.CharStream("-1000");
-    const output = PP.Z(input);
+    const output = yield* PP.Z(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(-1000);
@@ -34,9 +37,9 @@ describe("Z", () => {
         assert.fail();
     }
   });
-  it("should consume an integer with no leading sign", () => {
+  it("should consume an integer with no leading sign", function* () {
     const input = new CU.CharStream("0");
-    const output = PP.Z(input);
+    const output = yield* PP.Z(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(0);
@@ -48,9 +51,9 @@ describe("Z", () => {
 });
 
 describe("addrR", () => {
-  it("should consume an absolute R1 address", () => {
+  it("should consume an absolute R1 address", function* () {
     const input = new CU.CharStream("R10C11");
-    const output = PA.addrR(input);
+    const output = yield* PA.addrR(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(10);
@@ -60,9 +63,9 @@ describe("addrR", () => {
     }
   });
 
-  it("should not consume an A1 address", () => {
+  it("should not consume an A1 address", function* () {
     const input = new CU.CharStream("B33");
-    const output = PA.addrR(input);
+    const output = yield* PA.addrR(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -71,9 +74,9 @@ describe("addrR", () => {
     }
   });
 
-  it("should not consume a relative R1 address", () => {
+  it("should not consume a relative R1 address", function* () {
     const input = new CU.CharStream("R[10]C11");
-    const output = PA.addrR(input);
+    const output = yield* PA.addrR(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -84,9 +87,9 @@ describe("addrR", () => {
 });
 
 describe("addrRRel", () => {
-  it("should consume a relative R1 address", () => {
+  it("should consume a relative R1 address", function* () {
     const input = new CU.CharStream("R[10]C11");
-    const output = PA.addrRRel(input);
+    const output = yield* PA.addrRRel(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(10);
@@ -96,9 +99,9 @@ describe("addrRRel", () => {
     }
   });
 
-  it("should not consume an A1 address", () => {
+  it("should not consume an A1 address", function* () {
     const input = new CU.CharStream("B33");
-    const output = PA.addrRRel(input);
+    const output = yield* PA.addrRRel(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -107,9 +110,9 @@ describe("addrRRel", () => {
     }
   });
 
-  it("should not consume an absolute R1 address", () => {
+  it("should not consume an absolute R1 address", function* () {
     const input = new CU.CharStream("R10C11");
-    const output = PA.addrRRel(input);
+    const output = yield* PA.addrRRel(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -120,9 +123,9 @@ describe("addrRRel", () => {
 });
 
 describe("addrC", () => {
-  it("should consume an R1 address", () => {
+  it("should consume an R1 address", function* () {
     const input = new CU.CharStream("C11");
-    const output = PA.addrC(input);
+    const output = yield* PA.addrC(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(11);
@@ -132,9 +135,9 @@ describe("addrC", () => {
     }
   });
 
-  it("should not consume an A1 address", () => {
+  it("should not consume an A1 address", function* () {
     const input = new CU.CharStream("B33");
-    const output = PA.addrC(input);
+    const output = yield* PA.addrC(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -143,9 +146,9 @@ describe("addrC", () => {
     }
   });
 
-  it("should not consume a relative R1 address", () => {
+  it("should not consume a relative R1 address", function* () {
     const input = new CU.CharStream("C[33]");
-    const output = PA.addrC(input);
+    const output = yield* PA.addrC(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -156,9 +159,9 @@ describe("addrC", () => {
 });
 
 describe("addrCRel", () => {
-  it("should consume a relative R1 address", () => {
+  it("should consume a relative R1 address", function* () {
     const input = new CU.CharStream("C[11]");
-    const output = PA.addrCRel(input);
+    const output = yield* PA.addrCRel(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(11);
@@ -168,9 +171,9 @@ describe("addrCRel", () => {
     }
   });
 
-  it("should not consume an A1 address", () => {
+  it("should not consume an A1 address", function* () {
     const input = new CU.CharStream("B33");
-    const output = PA.addrCRel(input);
+    const output = yield* PA.addrCRel(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -179,9 +182,9 @@ describe("addrCRel", () => {
     }
   });
 
-  it("should not consume an absolute R1 address", () => {
+  it("should not consume an absolute R1 address", function* () {
     const input = new CU.CharStream("C33");
-    const output = PA.addrCRel(input);
+    const output = yield* PA.addrCRel(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -192,9 +195,9 @@ describe("addrCRel", () => {
 });
 
 describe("addrMode", () => {
-  it("should return absolute address mode for $", () => {
+  it("should return absolute address mode for $", function* () {
     const input = new CU.CharStream("$");
-    const output = PA.addrMode(input);
+    const output = yield* PA.addrMode(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(AST.AbsoluteAddress);
@@ -204,9 +207,9 @@ describe("addrMode", () => {
     }
   });
 
-  it("should return relative address mode for anything else", () => {
+  it("should return relative address mode for anything else", function* () {
     const input = new CU.CharStream("B33");
-    const output = PA.addrMode(input);
+    const output = yield* PA.addrMode(input);
     switch (output.tag) {
       case "success":
         expect(output.result).to.equal(AST.RelativeAddress);
@@ -219,9 +222,9 @@ describe("addrMode", () => {
 });
 
 describe("addrA1", () => {
-  it("should consume an ordinary A1 address", () => {
+  it("should consume an ordinary A1 address", function* () {
     const input = new CU.CharStream("V43");
-    const output = PA.addrA1(input);
+    const output = yield* PA.addrA1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(43);
@@ -234,9 +237,9 @@ describe("addrA1", () => {
     }
   });
 
-  it("should consume an absolutely-addressed A1 address", () => {
+  it("should consume an absolutely-addressed A1 address", function* () {
     const input = new CU.CharStream("$C$12");
-    const output = PA.addrA1(input);
+    const output = yield* PA.addrA1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(12);
@@ -249,9 +252,9 @@ describe("addrA1", () => {
     }
   });
 
-  it("should consume an A1 address with mixed modes (case 1)", () => {
+  it("should consume an A1 address with mixed modes (case 1)", function* () {
     const input = new CU.CharStream("$B1");
-    const output = PA.addrA1(input);
+    const output = yield* PA.addrA1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(1);
@@ -264,9 +267,9 @@ describe("addrA1", () => {
     }
   });
 
-  it("should consume an A1 address with mixed modes (case 2)", () => {
+  it("should consume an A1 address with mixed modes (case 2)", function* () {
     const input = new CU.CharStream("AA$770");
-    const output = PA.addrA1(input);
+    const output = yield* PA.addrA1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(770);
@@ -281,9 +284,9 @@ describe("addrA1", () => {
 });
 
 describe("addrR1C1", () => {
-  it("should consume an absolute R1 address", () => {
+  it("should consume an absolute R1 address", function* () {
     const input = new CU.CharStream("R23C4");
-    const output = PA.addrR1C1(input);
+    const output = yield* PA.addrR1C1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(23);
@@ -296,9 +299,9 @@ describe("addrR1C1", () => {
     }
   });
 
-  it("should consume a relative R1 address", () => {
+  it("should consume a relative R1 address", function* () {
     const input = new CU.CharStream("R[-23]C[7]");
-    const output = PA.addrR1C1(input);
+    const output = yield* PA.addrR1C1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(-23);
@@ -311,9 +314,9 @@ describe("addrR1C1", () => {
     }
   });
 
-  it("should consume a mixed R1 address (case 1)", () => {
+  it("should consume a mixed R1 address (case 1)", function* () {
     const input = new CU.CharStream("R223C[7]");
-    const output = PA.addrR1C1(input);
+    const output = yield* PA.addrR1C1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(223);
@@ -326,9 +329,9 @@ describe("addrR1C1", () => {
     }
   });
 
-  it("should consume a mixed R1 address (case 2)", () => {
+  it("should consume a mixed R1 address (case 2)", function* () {
     const input = new CU.CharStream("R[105]C1");
-    const output = PA.addrR1C1(input);
+    const output = yield* PA.addrR1C1(input);
     switch (output.tag) {
       case "success":
         expect(output.result.row).to.equal(105);
@@ -341,9 +344,9 @@ describe("addrR1C1", () => {
     }
   });
 
-  it("should not consume an A1 address", () => {
+  it("should not consume an A1 address", function* () {
     const input = new CU.CharStream("R1");
-    const output = PA.addrR1C1(input);
+    const output = yield* PA.addrR1C1(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -354,9 +357,9 @@ describe("addrR1C1", () => {
 });
 
 describe("rangeA1Contig", () => {
-  it("should parse a contiguous A1-style range", () => {
+  it("should parse a contiguous A1-style range", function* () {
     const input = new CU.CharStream("A1:B1");
-    const output = PR.rangeA1Contig(input);
+    const output = yield* PR.rangeA1Contig(input);
     const correct = new AST.Range([
       [
         new AST.Address(
@@ -384,9 +387,9 @@ describe("rangeA1Contig", () => {
     }
   });
 
-  it("should parse a contiguous R1C1-style range", () => {
+  it("should parse a contiguous R1C1-style range", function* () {
     const input = new CU.CharStream("R[1]C[-1]:R34C11102");
-    const output = PR.rangeR1C1Contig(input);
+    const output = yield* PR.rangeR1C1Contig(input);
     const correct = new AST.Range([
       [
         new AST.Address(
@@ -414,9 +417,9 @@ describe("rangeA1Contig", () => {
     }
   });
 
-  it("should not parse a mixed-style range (case 1)", () => {
+  it("should not parse a mixed-style range (case 1)", function* () {
     const input = new CU.CharStream("A1:R1C2");
-    const output = PR.rangeR1C1Contig(input);
+    const output = yield* PR.rangeR1C1Contig(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -425,9 +428,9 @@ describe("rangeA1Contig", () => {
     }
   });
 
-  it("should not parse a mixed-style range (case 2)", () => {
+  it("should not parse a mixed-style range (case 2)", function* () {
     const input = new CU.CharStream("R1C1:B1");
-    const output = PR.rangeR1C1Contig(input);
+    const output = yield* PR.rangeR1C1Contig(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -438,9 +441,9 @@ describe("rangeA1Contig", () => {
 });
 
 describe("rangeA1Discontig", () => {
-  it("should consume a discontiguous A1-style range", () => {
+  it("should consume a discontiguous A1-style range", function* () {
     const input = new CU.CharStream("A1:B10,C1:D10");
-    const output = PR.rangeA1Discontig(input);
+    const output = yield* PR.rangeA1Discontig(input);
     const correct = new AST.Range([
       [
         new AST.Address(
@@ -486,9 +489,9 @@ describe("rangeA1Discontig", () => {
 });
 
 describe("rangeR1C1Discontig", () => {
-  it("should consume a discontiguous R1C1-style range", () => {
+  it("should consume a discontiguous R1C1-style range", function* () {
     const input = new CU.CharStream("R1C1:R10C2,R1C3:R10C4");
-    const output = PR.rangeR1C1Discontig(input);
+    const output = yield* PR.rangeR1C1Discontig(input);
     const correct = new AST.Range([
       [
         new AST.Address(
@@ -534,9 +537,9 @@ describe("rangeR1C1Discontig", () => {
 });
 
 describe("rangeAny", () => {
-  it("should consume any A1 range", () => {
+  it("should consume any A1 range", function* () {
     const input = new CU.CharStream("A1:B10,C1:D10");
-    const output = PR.rangeAny(input);
+    const output = yield* PR.rangeAny(input);
     const correct = new AST.Range([
       [
         new AST.Address(
@@ -580,9 +583,9 @@ describe("rangeAny", () => {
     }
   });
 
-  it("should parse a contiguous R1C1-style range", () => {
+  it("should parse a contiguous R1C1-style range", function* () {
     const input = new CU.CharStream("R[1]C[-1]:R34C11102");
-    const output = PR.rangeAny(input);
+    const output = yield* PR.rangeAny(input);
     const correct = new AST.Range([
       [
         new AST.Address(
@@ -612,9 +615,9 @@ describe("rangeAny", () => {
 });
 
 describe("worksheetNameQuoted", () => {
-  it("should parse a quoted string", () => {
+  it("should parse a quoted string", function* () {
     const input = new CU.CharStream("'worksheet'");
-    const output = PRF.worksheetNameQuoted(input);
+    const output = yield* PRF.worksheetNameQuoted(input);
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("worksheet");
@@ -624,9 +627,9 @@ describe("worksheetNameQuoted", () => {
     }
   });
 
-  it("should not parse an unquoted string", () => {
+  it("should not parse an unquoted string", function* () {
     const input = new CU.CharStream("worksheet");
-    const output = PRF.worksheetNameQuoted(input);
+    const output = yield* PRF.worksheetNameQuoted(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -637,9 +640,9 @@ describe("worksheetNameQuoted", () => {
 });
 
 describe("worksheetNameUnquoted", () => {
-  it("should parse an unquoted string", () => {
+  it("should parse an unquoted string", function* () {
     const input = new CU.CharStream("worksheet");
-    const output = PRF.worksheetNameUnquoted(input);
+    const output = yield* PRF.worksheetNameUnquoted(input);
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("worksheet");
@@ -649,9 +652,9 @@ describe("worksheetNameUnquoted", () => {
     }
   });
 
-  it("should not parse a quoted string", () => {
+  it("should not parse a quoted string", function* () {
     const input = new CU.CharStream("'worksheet'");
-    const output = PRF.worksheetNameUnquoted(input);
+    const output = yield* PRF.worksheetNameUnquoted(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -662,9 +665,9 @@ describe("worksheetNameUnquoted", () => {
 });
 
 describe("worksheetName", () => {
-  it("should parse an unquoted string", () => {
+  it("should parse an unquoted string", function* () {
     const input = new CU.CharStream("worksheet");
-    const output = PRF.worksheetName(input);
+    const output = yield* PRF.worksheetName(input);
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("worksheet");
@@ -674,9 +677,9 @@ describe("worksheetName", () => {
     }
   });
 
-  it("should parse a quoted string", () => {
+  it("should parse a quoted string", function* () {
     const input = new CU.CharStream("'worksheet'");
-    const output = PRF.worksheetName(input);
+    const output = yield* PRF.worksheetName(input);
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("worksheet");
@@ -688,9 +691,9 @@ describe("worksheetName", () => {
 });
 
 describe("workbookName", () => {
-  it("should parse a valid workbook name", () => {
+  it("should parse a valid workbook name", function* () {
     const input = new CU.CharStream("[workbook]");
-    const output = PRF.workbookName(input);
+    const output = yield* PRF.workbookName(input);
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("workbook");
@@ -700,9 +703,9 @@ describe("workbookName", () => {
     }
   });
 
-  it("should not parse a malformed name", () => {
+  it("should not parse a malformed name", function* () {
     const input = new CU.CharStream("[workbook");
-    const output = PRF.workbookName(input);
+    const output = yield* PRF.workbookName(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -713,9 +716,9 @@ describe("workbookName", () => {
 });
 
 describe("rangePrefixQuoted", () => {
-  it("should parse a workbook-worksheet prefix", () => {
+  it("should parse a workbook-worksheet prefix", function* () {
     const input = new CU.CharStream("'[workbook]worksheet'");
-    const output = PRF.quotedPrefix(input);
+    const output = yield* PRF.quotedPrefix(input);
     switch (output.tag) {
       case "success":
         const [[p, wb], ws] = output.result;
@@ -728,9 +731,9 @@ describe("rangePrefixQuoted", () => {
     }
   });
 
-  it("should parse a path-workbook-worksheet prefix", () => {
+  it("should parse a path-workbook-worksheet prefix", function* () {
     const input = new CU.CharStream("'path[workbook]worksheet'");
-    const output = PRF.quotedPrefix(input);
+    const output = yield* PRF.quotedPrefix(input);
     switch (output.tag) {
       case "success":
         const [[p, wb], ws] = output.result;
@@ -745,9 +748,9 @@ describe("rangePrefixQuoted", () => {
 });
 
 describe("rangeReference", () => {
-  it("should parse a bare range reference", () => {
+  it("should parse a bare range reference", function* () {
     const input = new CU.CharStream("A1:B2");
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = yield* PRF.rangeReference(PR.rangeAny)(input);
     const expected = new AST.ReferenceRange(
       PP.EnvStub,
       new AST.Range([
@@ -778,9 +781,9 @@ describe("rangeReference", () => {
     }
   });
 
-  it("should parse a range reference with only a worksheet", () => {
+  it("should parse a range reference with only a worksheet", function* () {
     const input = new CU.CharStream("sheetysheet!A1:B2");
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = yield* PRF.rangeReference(PR.rangeAny)(input);
     const expected = new AST.ReferenceRange(
       new AST.Env("", "", "sheetysheet"),
       new AST.Range([
@@ -811,9 +814,9 @@ describe("rangeReference", () => {
     }
   });
 
-  it("should parse a range reference with a worksheet and a workbook", () => {
+  it("should parse a range reference with a worksheet and a workbook", function* () {
     const input = new CU.CharStream("'[foobar.xlsx]sheetysheet'!A1:B2");
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = yield* PRF.rangeReference(PR.rangeAny)(input);
     const expected = new AST.ReferenceRange(
       new AST.Env("", "foobar.xlsx", "sheetysheet"),
       new AST.Range([
@@ -844,11 +847,11 @@ describe("rangeReference", () => {
     }
   });
 
-  it("should parse this example from Microsoft's documentation", () => {
+  it("should parse this example from Microsoft's documentation", function* () {
     const input = new CU.CharStream(
       "'C:\\Reports\\[SourceWorkbook.xlsx]Sheet1'!$A$1:$B$2"
     );
-    const output = PRF.rangeReference(PR.rangeAny)(input);
+    const output = yield* PRF.rangeReference(PR.rangeAny)(input);
     const expectedEnv = new AST.Env(
       "C:\\Reports\\",
       "SourceWorkbook.xlsx",
@@ -886,9 +889,9 @@ describe("rangeReference", () => {
 });
 
 describe("addressReference", () => {
-  it("should parse a bare address reference", () => {
+  it("should parse a bare address reference", function* () {
     const input = new CU.CharStream("A1");
-    const output = PRF.addressReference(input);
+    const output = yield* PRF.addressReference(input);
     const expected = new AST.ReferenceAddress(
       PP.EnvStub,
       new AST.Address(
@@ -908,9 +911,9 @@ describe("addressReference", () => {
     }
   });
 
-  it("should parse an address reference with a worksheet", () => {
+  it("should parse an address reference with a worksheet", function* () {
     const input = new CU.CharStream("Sheet1!A1");
-    const output = PRF.addressReference(input);
+    const output = yield* PRF.addressReference(input);
     const expectedEnv = new AST.Env("", "", "Sheet1");
     const expected = new AST.ReferenceAddress(
       expectedEnv,
@@ -931,9 +934,9 @@ describe("addressReference", () => {
     }
   });
 
-  it("should parse an address reference with a quoted worksheet", () => {
+  it("should parse an address reference with a quoted worksheet", function* () {
     const input = new CU.CharStream("'Sheet1'!A1");
-    const output = PRF.addressReference(input);
+    const output = yield* PRF.addressReference(input);
     const expectedEnv = new AST.Env("", "", "Sheet1");
     const expected = new AST.ReferenceAddress(
       expectedEnv,
@@ -954,9 +957,9 @@ describe("addressReference", () => {
     }
   });
 
-  it("should parse an address reference with a workbook and worksheet", () => {
+  it("should parse an address reference with a workbook and worksheet", function* () {
     const input = new CU.CharStream("'[Foobar]Sheet1'!A1");
-    const output = PRF.addressReference(input);
+    const output = yield* PRF.addressReference(input);
     const expectedEnv = new AST.Env("", "Foobar", "Sheet1");
     const expected = new AST.ReferenceAddress(
       expectedEnv,
@@ -977,11 +980,11 @@ describe("addressReference", () => {
     }
   });
 
-  it("should parse this example similar to Microsoft's documentation", () => {
+  it("should parse this example similar to Microsoft's documentation", function* () {
     const input = new CU.CharStream(
       "'C:\\Reports\\[SourceWorkbook.xlsx]Sheet1'!R34C[-78]"
     );
-    const output = PRF.addressReference(input);
+    const output = yield* PRF.addressReference(input);
     const expectedEnv = new AST.Env(
       "C:\\Reports\\",
       "SourceWorkbook.xlsx",
@@ -1008,9 +1011,9 @@ describe("addressReference", () => {
 });
 
 describe("namedReference", () => {
-  it("should parse a named reference", () => {
+  it("should parse a named reference", function* () {
     const input = new CU.CharStream("My_Great_Ref8");
-    const output = PRF.namedReference(input);
+    const output = yield* PRF.namedReference(input);
     const expected = new AST.ReferenceNamed(PP.EnvStub, "My_Great_Ref8");
     switch (output.tag) {
       case "success":
@@ -1023,9 +1026,9 @@ describe("namedReference", () => {
 });
 
 describe("constant", () => {
-  it("should parse a float", () => {
+  it("should parse a float", function* () {
     const input = new CU.CharStream("1.234");
-    const output = PRF.constant(input);
+    const output = yield* PRF.constant(input);
     const expected = new AST.Number(PP.EnvStub, 1.234);
     switch (output.tag) {
       case "success":
@@ -1036,9 +1039,9 @@ describe("constant", () => {
     }
   });
 
-  it("should parse an integer", () => {
+  it("should parse an integer", function* () {
     const input = new CU.CharStream("1");
-    const output = PRF.constant(input);
+    const output = yield* PRF.constant(input);
     const expected = new AST.Number(PP.EnvStub, 1);
     switch (output.tag) {
       case "success":
@@ -1049,10 +1052,10 @@ describe("constant", () => {
     }
   });
 
-  it("should parse the percent sign at the end of a number", () => {
+  it("should parse the percent sign at the end of a number", function* () {
     // because it should acutally be handed by the unary operator parser
     const input = new CU.CharStream("123%");
-    const output = PRF.constant(input);
+    const output = yield* PRF.constant(input);
     const expected = new AST.Number(PP.EnvStub, 123);
     switch (output.tag) {
       case "success":
@@ -1065,9 +1068,9 @@ describe("constant", () => {
 });
 
 describe("stringLiteral", () => {
-  it("should parse a string literal", () => {
+  it("should parse a string literal", function* () {
     const input = new CU.CharStream('"Half shark alligator half man"');
-    const output = PRF.stringLiteral(input);
+    const output = yield* PRF.stringLiteral(input);
     const expected = new AST.StringLiteral(
       PP.EnvStub,
       "Half shark alligator half man"
@@ -1083,9 +1086,9 @@ describe("stringLiteral", () => {
 });
 
 describe("booleanLiteral", () => {
-  it("should parse TRUE", () => {
+  it("should parse TRUE", function* () {
     const input = new CU.CharStream("TRUE");
-    const output = PRF.booleanLiteral(input);
+    const output = yield* PRF.booleanLiteral(input);
     const expected = new AST.Boolean(PP.EnvStub, true);
     switch (output.tag) {
       case "success":
@@ -1096,9 +1099,9 @@ describe("booleanLiteral", () => {
     }
   });
 
-  it("should parse FALSE", () => {
+  it("should parse FALSE", function* () {
     const input = new CU.CharStream("FALSE");
-    const output = PRF.booleanLiteral(input);
+    const output = yield* PRF.booleanLiteral(input);
     const expected = new AST.Boolean(PP.EnvStub, false);
     switch (output.tag) {
       case "success":
@@ -1111,9 +1114,9 @@ describe("booleanLiteral", () => {
 });
 
 describe("varArgsFunctionName", () => {
-  it("should succeed on SUM", () => {
+  it("should succeed on SUM", function* () {
     const input = new CU.CharStream("SUM");
-    const output = PRW.varArgsFunctionName(input);
+    const output = yield* PRW.varArgsFunctionName(input);
     switch (output.tag) {
       case "success":
         expect(output.result.toString()).to.equal("SUM");
@@ -1125,9 +1128,9 @@ describe("varArgsFunctionName", () => {
 });
 
 describe("reservedWord", () => {
-  it("should fail if it encounters a reserved word", () => {
+  it("should fail if it encounters a reserved word", function* () {
     const input = new CU.CharStream("SUM");
-    const output = PRW.reservedWord(input);
+    const output = yield* PRW.reservedWord(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -1138,9 +1141,9 @@ describe("reservedWord", () => {
 });
 
 describe("data", () => {
-  it("should parse any reference to numeric data", () => {
+  it("should parse any reference to numeric data", function* () {
     const input = new CU.CharStream("3");
-    const output = PRF.data(PR.rangeAny)(input);
+    const output = yield* PRF.data(PR.rangeAny)(input);
     const expected = new AST.Number(PP.EnvStub, 3);
     switch (output.tag) {
       case "success":
@@ -1151,9 +1154,9 @@ describe("data", () => {
     }
   });
 
-  it("should parse any named reference", () => {
+  it("should parse any named reference", function* () {
     const input = new CU.CharStream("Joe");
-    const output = PRF.data(PR.rangeAny)(input);
+    const output = yield* PRF.data(PR.rangeAny)(input);
     const expected = new AST.ReferenceNamed(PP.EnvStub, "Joe");
     switch (output.tag) {
       case "success":
@@ -1164,9 +1167,9 @@ describe("data", () => {
     }
   });
 
-  it("should parse any string literal", () => {
+  it("should parse any string literal", function* () {
     const input = new CU.CharStream('"Joe Biden"');
-    const output = PRF.data(PR.rangeAny)(input);
+    const output = yield* PRF.data(PR.rangeAny)(input);
     const expected = new AST.StringLiteral(PP.EnvStub, "Joe Biden");
     switch (output.tag) {
       case "success":
@@ -1177,9 +1180,9 @@ describe("data", () => {
     }
   });
 
-  it("should parse any boolean", () => {
+  it("should parse any boolean", function* () {
     const input = new CU.CharStream("FALSE");
-    const output = PRF.data(PR.rangeAny)(input);
+    const output = yield* PRF.data(PR.rangeAny)(input);
     const expected = new AST.Boolean(PP.EnvStub, false);
     switch (output.tag) {
       case "success":
@@ -1190,9 +1193,9 @@ describe("data", () => {
     }
   });
 
-  it("should fail if it encounters a reserved word", () => {
+  it("should fail if it encounters a reserved word", function* () {
     const input = new CU.CharStream("SUMPRODUCT");
-    const output = PRF.data(PR.rangeAny)(input);
+    const output = yield* PRF.data(PR.rangeAny)(input);
     switch (output.tag) {
       case "success":
         assert.fail();
@@ -1203,9 +1206,9 @@ describe("data", () => {
 });
 
 describe("fApply", () => {
-  it("should parse an at-least-arity-two function application like COUNTIFS()", () => {
+  it("should parse an at-least-arity-two function application like COUNTIFS()", function* () {
     const input = new CU.CharStream('COUNTIFS(A1:A1,"red",B2:B2,"tx")');
-    const output = PE.fApply(PR.rangeAny)(input);
+    const output = yield* PE.fApply(PR.rangeAny)(input);
     const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "COUNTIFS",
@@ -1266,9 +1269,9 @@ describe("fApply", () => {
     }
   });
 
-  it("should parse a more-than-zero-arity function application like CEILING()", () => {
+  it("should parse a more-than-zero-arity function application like CEILING()", function* () {
     const input = new CU.CharStream("CEILING(A1,5)");
-    const output = PE.fApply(PR.rangeAny)(input);
+    const output = yield* PE.fApply(PR.rangeAny)(input);
     const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "CEILING",
@@ -1296,9 +1299,9 @@ describe("fApply", () => {
     }
   });
 
-  it("should parse a zero-arity function application like RAND()", () => {
+  it("should parse a zero-arity function application like RAND()", function* () {
     const input = new CU.CharStream("RAND()");
-    const output = PE.fApply(PR.rangeAny)(input);
+    const output = yield* PE.fApply(PR.rangeAny)(input);
     const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "RAND",
@@ -1314,9 +1317,9 @@ describe("fApply", () => {
     }
   });
 
-  it("should parse a varargs function application like SUM()", () => {
+  it("should parse a varargs function application like SUM()", function* () {
     const input = new CU.CharStream("SUM(A1,B2:B77,5)");
-    const output = PE.fApply(PR.rangeAny)(input);
+    const output = yield* PE.fApply(PR.rangeAny)(input);
     const expected = new AST.FunctionApplication(
       PP.EnvStub,
       "SUM",
@@ -1367,9 +1370,9 @@ describe("fApply", () => {
 });
 
 describe("binOp", () => {
-  it("should parse an addition expression like A1 + B2", () => {
+  it("should parse an addition expression like A1 + B2", function* () {
     const input = new CU.CharStream("A1 + B2");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "+",
       new AST.ReferenceAddress(
@@ -1402,9 +1405,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should correctly deal with precedence in an expresion like A1 * B2 + C3", () => {
+  it("should correctly deal with precedence in an expresion like A1 * B2 + C3", function* () {
     const input = new CU.CharStream("A1 * B2 + C3");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "+",
       new AST.BinOpExpression(
@@ -1450,9 +1453,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should parse a subtraction expression like A1 - B2", () => {
+  it("should parse a subtraction expression like A1 - B2", function* () {
     const input = new CU.CharStream("A1 - B2");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "-",
       new AST.ReferenceAddress(
@@ -1485,9 +1488,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should parse a division expression like A1 / B2", () => {
+  it("should parse a division expression like A1 / B2", function* () {
     const input = new CU.CharStream("A1 / B2");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "/",
       new AST.ReferenceAddress(
@@ -1520,9 +1523,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should handle left-associativity in A1 - B2 + C3", () => {
+  it("should handle left-associativity in A1 - B2 + C3", function* () {
     const input = new CU.CharStream("A1 - B2 + C3");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "+",
       new AST.BinOpExpression(
@@ -1568,9 +1571,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should handle left-associativity in A1 / B2 * C3", () => {
+  it("should handle left-associativity in A1 / B2 * C3", function* () {
     const input = new CU.CharStream("A1 / B2 * C3");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "*",
       new AST.BinOpExpression(
@@ -1616,9 +1619,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should parse unary expressions", () => {
+  it("should parse unary expressions", function* () {
     const input = new CU.CharStream("-R23C45");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.UnaryOpExpression(
       "-",
       new AST.ReferenceAddress(
@@ -1641,9 +1644,9 @@ describe("binOp", () => {
     }
   });
 
-  it('should parse a concatenation expression like "foo"&"bar"', () => {
+  it('should parse a concatenation expression like "foo"&"bar"', function* () {
     const input = new CU.CharStream('"foo"&"bar"');
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "&",
       new AST.StringLiteral(PP.EnvStub, "foo"),
@@ -1658,9 +1661,9 @@ describe("binOp", () => {
     }
   });
 
-  it('should parse a comparison expression like "foo"<>"bar"', () => {
+  it('should parse a comparison expression like "foo"<>"bar"', function* () {
     const input = new CU.CharStream('"foo"<>"bar"');
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "<>",
       new AST.StringLiteral(PP.EnvStub, "foo"),
@@ -1675,9 +1678,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should parse a comparison expression like 1=2", () => {
+  it("should parse a comparison expression like 1=2", function* () {
     const input = new CU.CharStream("1=2");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "=",
       new AST.Number(PP.EnvStub, 1),
@@ -1692,9 +1695,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should parse a comparison expression like A1>2", () => {
+  it("should parse a comparison expression like A1>2", function* () {
     const input = new CU.CharStream("A1>2");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       ">",
       new AST.ReferenceAddress(
@@ -1718,9 +1721,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should parse an exponentiation expression like A1^2", () => {
+  it("should parse an exponentiation expression like A1^2", function* () {
     const input = new CU.CharStream("A1^2");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "^",
       new AST.ReferenceAddress(
@@ -1744,9 +1747,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should correctly parse exponentiation as right-associative as in A1^(1-2)^B2", () => {
+  it("should correctly parse exponentiation as right-associative as in A1^(1-2)^B2", function* () {
     const input = new CU.CharStream("A1^(1-2)^B2");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.BinOpExpression(
       "^",
       new AST.ReferenceAddress(
@@ -1789,9 +1792,9 @@ describe("binOp", () => {
     }
   });
 
-  it("should parse a percentage expression like 2%", () => {
+  it("should parse a percentage expression like 2%", function* () {
     const input = new CU.CharStream("2%");
-    const output = PE.binOp(PR.rangeAny)(input);
+    const output = yield* PE.binOp(PR.rangeAny)(input);
     const expected = new AST.UnaryOpExpression(
       "%",
       new AST.Number(PP.EnvStub, 2)

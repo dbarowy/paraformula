@@ -461,7 +461,8 @@ export module Expression {
       const name = nameCS.toString();
       switch (PRW.whichArity(name)) {
         case "fixed" /* fixed arity */: {
-          const fixedArities = PRW.arityFixed.get(name)!;
+          const foo = PRW.arityFixed;
+          const fixedArities = PRW.arityFixed[name];
           const next = P.left<AST.Expression[], CU.CharStream>(
             sepBy(expr(R))(PP.Comma)
           )(P.char(")"));
@@ -485,7 +486,7 @@ export module Expression {
           );
         }
         case "atleast": {
-          const atLeastArity = PRW.arityAtLeastN.get(name)!;
+          const atLeastArity = PRW.arityAtLeastN[name];
           const next = P.left<AST.Expression[], CU.CharStream>(
             sepBy1(expr(R))(PP.Comma)
           )(P.char(")"));

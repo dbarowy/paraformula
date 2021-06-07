@@ -1,5 +1,3 @@
-import { Primitives as P, CharUtil as CU } from "parsecco";
-
 export module Util {
   /**
    * Convert an Excel A1 column string into a number.

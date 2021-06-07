@@ -2,7 +2,7 @@ export module AST {
   export type Expr = ReferenceExpr;
 
   export class Env {
-    public readonly tag = "Env";
+    public readonly tag = 'Env';
     public readonly path: string;
     public readonly workbookName: string;
     public readonly worksheetName: string;
@@ -14,43 +14,33 @@ export module AST {
     }
 
     public equals(e: Env): boolean {
-      return (
-        this.path === e.path &&
-        this.workbookName === e.workbookName &&
-        this.worksheetName === e.worksheetName
-      );
+      return this.path === e.path && this.workbookName === e.workbookName && this.worksheetName === e.worksheetName;
     }
   }
 
   export interface AbsoluteAddressMode {
-    tag: "AbsoluteAddress";
+    tag: 'AbsoluteAddress';
   }
   export interface RelativeAddressMode {
-    tag: "RelativeAddress";
+    tag: 'RelativeAddress';
   }
   export const AbsoluteAddress: AbsoluteAddressMode = {
-    tag: "AbsoluteAddress",
+    tag: 'AbsoluteAddress',
   };
   export const RelativeAddress: RelativeAddressMode = {
-    tag: "RelativeAddress",
+    tag: 'RelativeAddress',
   };
   export type AddressMode = AbsoluteAddressMode | RelativeAddressMode;
 
   export class Address {
-    public readonly tag = "Address";
+    public readonly tag = 'Address';
     public readonly row: number;
     public readonly column: number;
     public readonly rowMode: AddressMode;
     public readonly colMode: AddressMode;
     public readonly env: Env;
 
-    constructor(
-      row: number,
-      column: number,
-      rowMode: AddressMode,
-      colMode: AddressMode,
-      env: Env
-    ) {
+    constructor(row: number, column: number, rowMode: AddressMode, colMode: AddressMode, env: Env) {
       this.row = row;
       this.column = column;
       this.rowMode = rowMode;
@@ -82,7 +72,7 @@ export module AST {
     }
 
     public toString(): string {
-      return "(" + this.column.toString() + "," + this.row.toString() + ")";
+      return '(' + this.column.toString() + ',' + this.row.toString() + ')';
     }
 
     /**
@@ -91,18 +81,12 @@ export module AST {
      * @returns An Address.
      */
     public copyWithNewEnv(env: Env) {
-      return new Address(
-        this.row,
-        this.column,
-        this.rowMode,
-        this.colMode,
-        env
-      );
+      return new Address(this.row, this.column, this.rowMode, this.colMode, env);
     }
   }
 
   export class Range {
-    public readonly tag = "Range";
+    public readonly tag = 'Range';
     public readonly regions: [Address, Address][] = [];
 
     constructor(regions: [Address, Address][]) {
@@ -131,24 +115,17 @@ export module AST {
      * @returns A Range.
      */
     public copyWithNewEnv(env: Env): Range {
-      return new Range(
-        this.regions.map(([tl, br]) => [
-          tl.copyWithNewEnv(env),
-          br.copyWithNewEnv(env),
-        ])
-      );
+      return new Range(this.regions.map(([tl, br]) => [tl.copyWithNewEnv(env), br.copyWithNewEnv(env)]));
     }
 
     public toString(): string {
-      const sregs = this.regions.map(
-        ([tl, br]) => tl.toString() + ":" + br.toString()
-      );
-      return "List(" + sregs.join(",") + ")";
+      const sregs = this.regions.map(([tl, br]) => tl.toString() + ':' + br.toString());
+      return 'List(' + sregs.join(',') + ')';
     }
   }
 
   export abstract class ReferenceExpr {
-    public tag = "ReferenceExpr";
+    public tag = 'ReferenceExpr';
     public readonly path: string;
     public readonly workbookName: string;
     public readonly worksheetName: string;
@@ -161,12 +138,12 @@ export module AST {
     }
 
     public get toFormula(): string {
-      throw new Error("not implemented");
+      throw new Error('not implemented');
     }
   }
 
   export class ReferenceRange extends ReferenceExpr {
-    public readonly tag = "ReferenceRange";
+    public readonly tag = 'ReferenceRange';
     public readonly rng: Range;
 
     constructor(env: Env, r: Range) {
@@ -176,21 +153,21 @@ export module AST {
 
     public toString(): string {
       return (
-        "ReferenceRange(" +
+        'ReferenceRange(' +
         this.path +
-        ",[" +
+        ',[' +
         this.workbookName +
-        "]," +
+        '],' +
         this.worksheetName +
-        "," +
+        ',' +
         this.rng.toString() +
-        ")"
+        ')'
       );
     }
   }
 
   export class ReferenceAddress extends ReferenceExpr {
-    public readonly tag = "ReferenceAddress";
+    public readonly tag = 'ReferenceAddress';
     public readonly address: Address;
 
     constructor(env: Env, address: Address) {
@@ -200,21 +177,21 @@ export module AST {
 
     public toString(): string {
       return (
-        "ReferenceAddress(" +
+        'ReferenceAddress(' +
         this.path +
-        ",[" +
+        ',[' +
         this.workbookName +
-        "]," +
+        '],' +
         this.worksheetName +
-        "," +
+        ',' +
         this.address.toString() +
-        ")"
+        ')'
       );
     }
   }
 
   export class ReferenceNamed extends ReferenceExpr {
-    public readonly tag = "ReferenceNamed";
+    public readonly tag = 'ReferenceNamed';
     public readonly varName: string;
 
     constructor(env: Env, varName: string) {
@@ -223,7 +200,7 @@ export module AST {
     }
 
     public toString(): string {
-      return "ReferenceName(" + this.varName + ")";
+      return 'ReferenceName(' + this.varName + ')';
     }
   }
 
@@ -247,7 +224,7 @@ export module AST {
   export type Arity = FixedArity | LowBoundArity | VarArgsArity;
 
   export class FunctionApplication extends ReferenceExpr {
-    public readonly tag = "FunctionApplication";
+    public readonly tag = 'FunctionApplication';
     public readonly name: string;
     public readonly args: Expression[];
     public readonly arity: Arity;
@@ -260,14 +237,12 @@ export module AST {
     }
 
     public toString(): string {
-      return (
-        this.name + "(" + this.args.map((arg) => arg.toFormula).join(",") + ")"
-      );
+      return this.name + '(' + this.args.map(arg => arg.toFormula).join(',') + ')';
     }
   }
 
   export class Number extends ReferenceExpr {
-    public readonly tag = "Number";
+    public readonly tag = 'Number';
     public readonly value: number;
 
     constructor(env: Env, value: number) {
@@ -276,12 +251,12 @@ export module AST {
     }
 
     public toString(): string {
-      return "Number(" + this.value + ")";
+      return 'Number(' + this.value + ')';
     }
   }
 
   export class StringLiteral extends ReferenceExpr {
-    public readonly tag = "StringLiteral";
+    public readonly tag = 'StringLiteral';
     public readonly value: string;
 
     constructor(env: Env, value: string) {
@@ -290,12 +265,12 @@ export module AST {
     }
 
     public toString(): string {
-      return "String(" + this.value + ")";
+      return 'String(' + this.value + ')';
     }
   }
 
   export class Boolean extends ReferenceExpr {
-    public readonly tag = "Boolean";
+    public readonly tag = 'Boolean';
     public readonly value: boolean;
 
     constructor(env: Env, value: boolean) {
@@ -304,7 +279,7 @@ export module AST {
     }
 
     public toString(): string {
-      return "Boolean(" + this.value + ")";
+      return 'Boolean(' + this.value + ')';
     }
   }
 
@@ -312,18 +287,18 @@ export module AST {
   // the reserved words class, which is designed
   // to fail
   export class PoisonPill extends ReferenceExpr {
-    public readonly tag = "PoisonPill";
+    public readonly tag = 'PoisonPill';
     constructor(env: Env) {
       super(env);
     }
 
     public toString(): string {
-      throw new Error("This object should never be instantiated.");
+      throw new Error('This object should never be instantiated.');
     }
   }
 
   export class ParensExpr {
-    public readonly tag = "ParensExpr";
+    public readonly tag = 'ParensExpr';
     public readonly expr: Expression;
 
     constructor(expr: Expression) {
@@ -331,12 +306,12 @@ export module AST {
     }
 
     public get toFormula(): string {
-      return "(" + this.expr.toFormula + ")";
+      return '(' + this.expr.toFormula + ')';
     }
   }
 
   export class BinOpExpression {
-    public readonly tag = "BinOpExpression";
+    public readonly tag = 'BinOpExpression';
     public readonly op: string;
     public readonly exprL: Expression;
     public readonly exprR: Expression;
@@ -348,20 +323,12 @@ export module AST {
     }
 
     public get toFormula(): string {
-      return (
-        "BinOpExpr(" +
-        this.op.toString() +
-        "," +
-        this.exprL.toFormula +
-        "," +
-        this.exprR.toFormula +
-        ")"
-      );
+      return 'BinOpExpr(' + this.op.toString() + ',' + this.exprL.toFormula + ',' + this.exprR.toFormula + ')';
     }
   }
 
   export class UnaryOpExpression {
-    public readonly tag = "UnaryOpExpression";
+    public readonly tag = 'UnaryOpExpression';
     public readonly op: string;
     public readonly expr: Expression;
 
@@ -371,15 +338,9 @@ export module AST {
     }
 
     public get toFormula(): string {
-      return (
-        "UnaryOpExpr(" + this.op.toString() + "," + this.expr.toFormula + ")"
-      );
+      return 'UnaryOpExpr(' + this.op.toString() + ',' + this.expr.toFormula + ')';
     }
   }
 
-  export type Expression =
-    | ReferenceExpr
-    | ParensExpr
-    | BinOpExpression
-    | UnaryOpExpression;
+  export type Expression = ReferenceExpr | ParensExpr | BinOpExpression | UnaryOpExpression;
 }

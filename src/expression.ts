@@ -145,7 +145,7 @@ export module Expression {
     return P.pipe2<PrecedenceLevel2[], AST.Expression, AST.Expression>(P.many(exponent(R)))(level1(R))((es, e) => {
       if (es.length > 0) {
         const exps = rev(es).reduce((acc, lhs) => {
-          const exp = new AST.BinOpExpression(lhs.op, lhs.expr, acc);
+          const exp = new AST.BinOpExpr(lhs.op, lhs.expr, acc);
           return exp;
         }, e);
         return exps;
@@ -172,7 +172,7 @@ export module Expression {
       )
     )(
       // yields a binop from a list of multiplicands
-      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr), t1)
+      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -193,7 +193,7 @@ export module Expression {
       )
     )(
       // yields a binop from a list of addends
-      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr), t1)
+      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -210,7 +210,7 @@ export module Expression {
       P.many1(P.pipe<AST.Expression, PrecedenceLevel5>(concatenation(R))(e => new PrecedenceLevel5(e)))
     )(
       // yields a binop from a list of addends
-      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr), t1)
+      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -236,7 +236,7 @@ export module Expression {
       )
     )(
       // yields a binop from a list of addends
-      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr), t1)
+      (t1, t2) => t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -247,13 +247,13 @@ export module Expression {
   function unary(R: P.IParser<AST.Range>): P.IParser<AST.Expression> {
     return P.choices<AST.Expression>(
       P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(P.char('+'))(exprSimple(R))(
-        (_sign, e) => new AST.UnaryOpExpression('+', e)
+        (_sign, e) => new AST.UnaryOpExpr('+', e)
       ),
       P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(P.char('-'))(exprSimple(R))(
-        (_sign, e) => new AST.UnaryOpExpression('-', e)
+        (_sign, e) => new AST.UnaryOpExpr('-', e)
       ),
       P.pipe2<AST.Expression, CU.CharStream, AST.Expression>(exprSimple(R))(P.char('%'))(
-        (e, _op) => new AST.UnaryOpExpression('%', e)
+        (e, _op) => new AST.UnaryOpExpr('%', e)
       )
     );
   }
@@ -327,7 +327,7 @@ export module Expression {
             if (!fixedArities.has(exprs.length)) {
               return P.zero<AST.FunctionApplication>('Arity ' + fixedArities + ' expected for function ' + name);
             }
-            return P.result(new AST.FunctionApplication(PP.EnvStub, name, exprs, new AST.FixedArity(exprs.length)));
+            return P.result(new AST.FunctionApplication(name, exprs, new AST.FixedArity(exprs.length)));
           });
         }
         case 'atleast': {
@@ -338,13 +338,13 @@ export module Expression {
             if (!(exprs.length >= atLeastArity)) {
               return P.zero<AST.FunctionApplication>('Arity ' + atLeastArity + ' expected for function ' + name);
             }
-            return P.result(new AST.FunctionApplication(PP.EnvStub, name, exprs, new AST.LowBoundArity(atLeastArity)));
+            return P.result(new AST.FunctionApplication(name, exprs, new AST.LowBoundArity(atLeastArity)));
           });
         }
         case 'any': {
           const next = P.left<AST.Expression[], CU.CharStream>(sepBy(expr(R))(PP.Comma))(P.char(')'));
           return P.bind<AST.Expression[], AST.FunctionApplication>(next)(exprs => {
-            return P.result(new AST.FunctionApplication(PP.EnvStub, name, exprs, AST.VarArgsArityInst));
+            return P.result(new AST.FunctionApplication(name, exprs, AST.VarArgsArityInst));
           });
         }
         case 'unknown':
@@ -409,7 +409,7 @@ export module Expression {
    * Parses either functions or data.
    */
   export function exprAtom(R: P.IParser<AST.Range>) {
-    return P.choice<AST.ReferenceExpr>(fApply(R))(PRF.data(R));
+    return P.choice<AST.Expression>(fApply(R))(PRF.data(R));
   }
 
   /**

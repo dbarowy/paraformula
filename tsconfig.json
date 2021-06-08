@@ -9,7 +9,12 @@
     "sourceMap": true /* Generates corresponding '.map' file. */,
     "outDir": "dist" /* Redirect output structure to the directory. */,
     "strict": true /* Enable all strict type-checking options. */,
-    "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */
+    "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true
   },
   "exclude": ["node_modules", "test", "examples"],
   "include": ["src"]

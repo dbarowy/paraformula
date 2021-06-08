@@ -1,6 +1,5 @@
 import { Primitives as P, CharUtil as CU } from 'parsecco';
 import { AST } from './ast';
-import { Primitives as PP } from './primitives';
 
 export module ReservedWords {
   interface AritiesMap {
@@ -1454,7 +1453,7 @@ export module ReservedWords {
         arityAtLeast3FunctionName,
         varArgsFunctionName
       )
-    )(_cs => new AST.PoisonPill(PP.EnvStub))
+    )(_cs => new AST.PoisonPill())
   )('Cannot parse a reserved word.') as P.IParser<undefined>;
 
   /**

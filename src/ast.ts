@@ -1,8 +1,7 @@
 export module AST {
-  export type Expr = ReferenceExpr;
-
   export class Env {
-    public readonly tag = 'Env';
+    public static readonly type: 'Env' = 'Env';
+    public readonly tag = Env.type;
     public readonly path: string;
     public readonly workbookName: string;
     public readonly worksheetName: string;
@@ -19,21 +18,22 @@ export module AST {
   }
 
   export interface AbsoluteAddressMode {
-    tag: 'AbsoluteAddress';
+    type: 'AbsoluteAddress';
   }
   export interface RelativeAddressMode {
-    tag: 'RelativeAddress';
+    type: 'RelativeAddress';
   }
   export const AbsoluteAddress: AbsoluteAddressMode = {
-    tag: 'AbsoluteAddress',
+    type: 'AbsoluteAddress',
   };
   export const RelativeAddress: RelativeAddressMode = {
-    tag: 'RelativeAddress',
+    type: 'RelativeAddress',
   };
   export type AddressMode = AbsoluteAddressMode | RelativeAddressMode;
 
   export class Address {
-    public readonly tag = 'Address';
+    public static readonly type: 'Address' = 'Address';
+    public readonly type = Address.type;
     public readonly row: number;
     public readonly column: number;
     public readonly rowMode: AddressMode;
@@ -75,6 +75,10 @@ export module AST {
       return '(' + this.column.toString() + ',' + this.row.toString() + ')';
     }
 
+    public get toFormula(): string {
+      return '';
+    }
+
     /**
      * Returns a copy of this Address but with an updated Env.
      * @param env An Env object.
@@ -83,10 +87,41 @@ export module AST {
     public copyWithNewEnv(env: Env) {
       return new Address(this.row, this.column, this.rowMode, this.colMode, env);
     }
+
+    private static intToColChars(dividend: number): string {
+      let quot = Math.floor(dividend / 26);
+      const rem = dividend % 26;
+      if (rem === 0) {
+        quot -= 1;
+      }
+      const ltr = rem === 0 ? 'Z' : String.fromCharCode(64 + rem);
+      if (quot === 0) {
+        return ltr;
+      } else {
+        return Address.intToColChars(quot) + ltr;
+      }
+    }
+
+    public toA1Ref(): string {
+      return Address.intToColChars(this.column) + this.row.toString();
+    }
+
+    public toR1C1Ref(): string {
+      return 'R' + this.row + 'C' + this.column;
+    }
+
+    public toFullyQualifiedR1C1Ref(): string {
+      return this.env.worksheetName + '!' + this.toR1C1Ref();
+    }
+
+    public toFullyQualifiedA1Ref(): string {
+      return this.env.worksheetName + '!' + this.toA1Ref();
+    }
   }
 
   export class Range {
-    public readonly tag = 'Range';
+    public static readonly type: 'Range' = 'Range';
+    public readonly type = Range.type;
     public readonly regions: [Address, Address][] = [];
 
     constructor(regions: [Address, Address][]) {
@@ -122,85 +157,84 @@ export module AST {
       const sregs = this.regions.map(([tl, br]) => tl.toString() + ':' + br.toString());
       return 'List(' + sregs.join(',') + ')';
     }
-  }
-
-  export abstract class ReferenceExpr {
-    public tag = 'ReferenceExpr';
-    public readonly path: string;
-    public readonly workbookName: string;
-    public readonly worksheetName: string;
-    abstract toString(): string;
-
-    constructor(env: Env) {
-      this.path = env.path;
-      this.workbookName = env.workbookName;
-      this.worksheetName = env.worksheetName;
-    }
 
     public get toFormula(): string {
-      throw new Error('not implemented');
+      return this.regions.map(([tl, br]) => tl.toString() + ':' + br.toString()).join(',');
     }
   }
 
-  export class ReferenceRange extends ReferenceExpr {
-    public readonly tag = 'ReferenceRange';
+  export interface IExpr {
+    /**
+     * Returns the type tag for the expression subtype,
+     * for use in pattern-matching expressions. Also
+     * available as a static property on ReferenceExpr
+     * types.
+     */
+    readonly type: string;
+
+    /**
+     * Generates a valid Excel formula from this expression.
+     */
+    toFormula: string;
+
+    /**
+     * Pretty-prints the AST as a string.  Note that this
+     * does not produce a valid Excel formula.
+     */
+    toString(): string;
+  }
+
+  export class ReferenceRange implements IExpr {
+    public static readonly type: 'ReferenceRange' = 'ReferenceRange';
+    public readonly type = ReferenceRange.type;
     public readonly rng: Range;
 
     constructor(env: Env, r: Range) {
-      super(env);
       this.rng = r.copyWithNewEnv(env);
     }
 
+    public get toFormula(): string {
+      return this.rng.toFormula;
+    }
+
     public toString(): string {
-      return (
-        'ReferenceRange(' +
-        this.path +
-        ',[' +
-        this.workbookName +
-        '],' +
-        this.worksheetName +
-        ',' +
-        this.rng.toString() +
-        ')'
-      );
+      return 'ReferenceRange(' + this.rng.toString() + ')';
     }
   }
 
-  export class ReferenceAddress extends ReferenceExpr {
-    public readonly tag = 'ReferenceAddress';
+  export class ReferenceAddress implements IExpr {
+    public static readonly type: 'ReferenceAddress' = 'ReferenceAddress';
+    public readonly type = ReferenceAddress.type;
     public readonly address: Address;
 
     constructor(env: Env, address: Address) {
-      super(env);
       this.address = address.copyWithNewEnv(env);
     }
 
     public toString(): string {
-      return (
-        'ReferenceAddress(' +
-        this.path +
-        ',[' +
-        this.workbookName +
-        '],' +
-        this.worksheetName +
-        ',' +
-        this.address.toString() +
-        ')'
-      );
+      return 'ReferenceAddress(' + this.address.toString() + ')';
+    }
+
+    public get toFormula(): string {
+      return this.address.toFormula;
     }
   }
 
-  export class ReferenceNamed extends ReferenceExpr {
-    public readonly tag = 'ReferenceNamed';
+  export class ReferenceNamed implements IExpr {
+    public static readonly type: 'ReferenceNamed' = 'ReferenceNamed';
+    public readonly type = ReferenceNamed.type;
     public readonly varName: string;
 
-    constructor(env: Env, varName: string) {
-      super(env);
+    constructor(varName: string) {
       this.varName = varName;
     }
 
     public toString(): string {
       return 'ReferenceName(' + this.varName + ')';
+    }
+
+    public get toFormula(): string {
+      return this.varName;
     }
   }
 
@@ -223,86 +257,109 @@ export module AST {
 
   export type Arity = FixedArity | LowBoundArity | VarArgsArity;
 
-  export class FunctionApplication extends ReferenceExpr {
-    public readonly tag = 'FunctionApplication';
+  export class FunctionApplication implements IExpr {
+    public static readonly type: 'FunctionApplication' = 'FunctionApplication';
+    public readonly type = FunctionApplication.type;
     public readonly name: string;
-    public readonly args: Expression[];
+    public readonly args: IExpr[];
     public readonly arity: Arity;
 
-    constructor(env: Env, name: string, args: Expression[], arity: Arity) {
-      super(env);
+    constructor(name: string, args: IExpr[], arity: Arity) {
       this.name = name;
       this.args = args;
       this.arity = arity;
     }
 
     public toString(): string {
+      return 'Function[' + this.name + ',' + this.arity + '](' + this.args.map(arg => arg.toFormula).join(',') + ')';
+    }
+
+    public get toFormula(): string {
       return this.name + '(' + this.args.map(arg => arg.toFormula).join(',') + ')';
     }
   }
 
-  export class Number extends ReferenceExpr {
-    public readonly tag = 'Number';
+  export class Number implements IExpr {
+    public static readonly type: 'Number' = 'Number';
+    public readonly type = Number.type;
     public readonly value: number;
 
-    constructor(env: Env, value: number) {
-      super(env);
+    constructor(value: number) {
       this.value = value;
     }
 
     public toString(): string {
       return 'Number(' + this.value + ')';
     }
+
+    public get toFormula(): string {
+      return this.value.toString();
+    }
   }
 
-  export class StringLiteral extends ReferenceExpr {
-    public readonly tag = 'StringLiteral';
+  export class StringLiteral implements IExpr {
+    public static readonly type: 'StringLiteral' = 'StringLiteral';
+    public readonly type = StringLiteral.type;
     public readonly value: string;
 
-    constructor(env: Env, value: string) {
-      super(env);
+    constructor(value: string) {
       this.value = value;
     }
 
     public toString(): string {
       return 'String(' + this.value + ')';
     }
+
+    public get toFormula(): string {
+      return '"' + this.value + '"';
+    }
   }
 
-  export class Boolean extends ReferenceExpr {
-    public readonly tag = 'Boolean';
+  export class Boolean implements IExpr {
+    public static readonly type: 'Boolean' = 'Boolean';
+    public readonly type = Boolean.type;
     public readonly value: boolean;
 
-    constructor(env: Env, value: boolean) {
-      super(env);
+    constructor(value: boolean) {
       this.value = value;
     }
 
     public toString(): string {
       return 'Boolean(' + this.value + ')';
     }
+
+    public get toFormula(): string {
+      return this.value.toString().toUpperCase();
+    }
   }
 
   // this should only ever be instantiated by
   // the reserved words class, which is designed
   // to fail
-  export class PoisonPill extends ReferenceExpr {
-    public readonly tag = 'PoisonPill';
-    constructor(env: Env) {
-      super(env);
-    }
+  export class PoisonPill implements IExpr {
+    public static readonly type: 'PoisonPill' = 'PoisonPill';
+    public readonly type = PoisonPill.type;
 
     public toString(): string {
-      throw new Error('This object should never be instantiated.');
+      throw new Error('This object should never appear in an AST.');
+    }
+
+    public get toFormula(): string {
+      throw new Error('This object should never appear in an AST.');
     }
   }
 
-  export class ParensExpr {
-    public readonly tag = 'ParensExpr';
-    public readonly expr: Expression;
+  export class ParensExpr implements IExpr {
+    public static readonly type: 'ParensExpr' = 'ParensExpr';
+    public readonly type = ParensExpr.type;
+    public readonly expr: IExpr;
 
-    constructor(expr: Expression) {
+    constructor(expr: IExpr) {
       this.expr = expr;
+    }
+
+    public toString(): string {
+      return 'Parens(' + this.expr.toString() + ')';
     }
 
     public get toFormula(): string {
@@ -310,37 +367,57 @@ export module AST {
     }
   }
 
-  export class BinOpExpression {
-    public readonly tag = 'BinOpExpression';
+  export class BinOpExpr implements IExpr {
+    public static readonly type: 'BinOpExpr' = 'BinOpExpr';
+    public readonly type = BinOpExpr.type;
     public readonly op: string;
-    public readonly exprL: Expression;
-    public readonly exprR: Expression;
+    public readonly exprL: IExpr;
+    public readonly exprR: IExpr;
 
-    constructor(op: string, exprL: Expression, exprR: Expression) {
+    constructor(op: string, exprL: IExpr, exprR: IExpr) {
       this.op = op;
       this.exprR = exprR;
       this.exprL = exprL;
     }
 
     public get toFormula(): string {
+      return this.exprL.toFormula + ' ' + this.op + ' ' + this.exprR.toFormula;
+    }
+
+    public toString(): string {
       return 'BinOpExpr(' + this.op.toString() + ',' + this.exprL.toFormula + ',' + this.exprR.toFormula + ')';
     }
   }
 
-  export class UnaryOpExpression {
-    public readonly tag = 'UnaryOpExpression';
+  export class UnaryOpExpr implements IExpr {
+    public static readonly type: 'UnaryOpExpr' = 'UnaryOpExpr';
+    public readonly type = UnaryOpExpr.type;
     public readonly op: string;
-    public readonly expr: Expression;
+    public readonly expr: IExpr;
 
-    constructor(op: string, expr: Expression) {
+    constructor(op: string, expr: IExpr) {
       this.op = op;
       this.expr = expr;
     }
 
     public get toFormula(): string {
+      return this.op + this.expr.toFormula;
+    }
+
+    public toString(): string {
       return 'UnaryOpExpr(' + this.op.toString() + ',' + this.expr.toFormula + ')';
     }
   }
 
-  export type Expression = ReferenceExpr | ParensExpr | BinOpExpression | UnaryOpExpression;
+  export type Expression =
+    | ReferenceRange
+    | ReferenceAddress
+    | ReferenceNamed
+    | FunctionApplication
+    | Number
+    | StringLiteral
+    | Boolean
+    | BinOpExpr
+    | UnaryOpExpr
+    | ParensExpr;
 }

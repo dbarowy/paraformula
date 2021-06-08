@@ -352,9 +352,9 @@ export module AST {
   export class ParensExpr implements IExpr {
     public static readonly type: 'ParensExpr' = 'ParensExpr';
     public readonly type = ParensExpr.type;
-    public readonly expr: IExpr;
+    public readonly expr: Expression;
 
-    constructor(expr: IExpr) {
+    constructor(expr: Expression) {
       this.expr = expr;
     }
 
@@ -371,10 +371,10 @@ export module AST {
     public static readonly type: 'BinOpExpr' = 'BinOpExpr';
     public readonly type = BinOpExpr.type;
     public readonly op: string;
-    public readonly exprL: IExpr;
-    public readonly exprR: IExpr;
+    public readonly exprL: Expression;
+    public readonly exprR: Expression;
 
-    constructor(op: string, exprL: IExpr, exprR: IExpr) {
+    constructor(op: string, exprL: Expression, exprR: Expression) {
       this.op = op;
       this.exprR = exprR;
       this.exprL = exprL;
@@ -393,9 +393,9 @@ export module AST {
     public static readonly type: 'UnaryOpExpr' = 'UnaryOpExpr';
     public readonly type = UnaryOpExpr.type;
     public readonly op: string;
-    public readonly expr: IExpr;
+    public readonly expr: Expression;
 
-    constructor(op: string, expr: IExpr) {
+    constructor(op: string, expr: Expression) {
       this.op = op;
       this.expr = expr;
     }

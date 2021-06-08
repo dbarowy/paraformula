@@ -1,5 +1,5 @@
 import { AST } from './ast';
-import { Primitives as P, CharUtil as CU } from '../../parsecco/src/index';
+import { Primitives as P, CharUtil as CU } from 'parsecco';
 import { Expression as PE } from './expression';
 import { Range as PR } from './range';
 

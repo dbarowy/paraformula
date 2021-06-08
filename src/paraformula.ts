@@ -32,4 +32,20 @@ export module Paraformula {
       throw new Error('This should never happen.');
     }
   }
+
+  /**
+   * Parses an Excel formula and returns an AST.  Throws an
+   * exception if the input is invalid. Yieldable.
+   * @param input A formula string
+   */
+  export function* yieldableParse(input: string): Generator<undefined, AST.Expression, undefined> {
+    const cs = new CU.CharStream(input);
+    const output = yield* grammar(cs);
+    switch (output.tag) {
+      case 'success':
+        return output.result;
+      case 'failure':
+        throw new Error('Unable to parse input: ' + output.error_msg);
+    }
+  }
 }

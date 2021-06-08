@@ -1402,6 +1402,34 @@ describe('parse', () => {
   });
 });
 
+describe('yieldableParse', () => {
+  it('should be able to parse anything', function* () {
+    const input = '=SUM(A1,B2:B77,5)';
+    const output = yield* Paraformula.yieldableParse(input);
+    const expected = new AST.FunctionApplication(
+      'SUM',
+      [
+        new AST.ReferenceAddress(
+          PP.EnvStub,
+          new AST.Address(1, 1, AST.RelativeAddress, AST.RelativeAddress, PP.EnvStub)
+        ),
+        new AST.ReferenceRange(
+          PP.EnvStub,
+          new AST.Range([
+            [
+              new AST.Address(2, 2, AST.RelativeAddress, AST.RelativeAddress, PP.EnvStub),
+              new AST.Address(77, 2, AST.RelativeAddress, AST.RelativeAddress, PP.EnvStub),
+            ],
+          ])
+        ),
+        new AST.Number(5),
+      ],
+      AST.VarArgsArityInst
+    );
+    expect(output).to.eql(expected);
+  });
+});
+
 describe('AST.Expression', () => {
   it('should be pattern-matchable', () => {
     const input = '=A1';

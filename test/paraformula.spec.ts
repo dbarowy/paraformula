@@ -1853,13 +1853,19 @@ describe("parse", () => {
   });
 });
 
-// describe("Expression", () => {
-//   it("subclasses should be pattern-matchable", () => {
-//     const input = "=A1";
-//     const output = Paraformula.parse(input);
-//     switch(output.type) {
-//       case AST.ReferenceAddress.type:
-//         expect(output.)
-//     }
-//   });
-// });
+describe("AST.Expression", () => {
+  it("should be pattern-matchable", () => {
+    const input = "=A1";
+    const output = Paraformula.parse(input);
+    switch (output.type) {
+      case AST.ReferenceAddress.type:
+        expect(output.address.column).to.eql(1);
+        expect(output.address.colMode).to.eql(AST.RelativeAddress);
+        expect(output.address.row).to.eql(1);
+        expect(output.address.rowMode).to.eql(AST.RelativeAddress);
+        break;
+      default:
+        assert.fail();
+    }
+  });
+});

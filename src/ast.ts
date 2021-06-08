@@ -188,7 +188,7 @@ export module AST {
     }
   }
 
-  export interface Expression {
+  export interface IExpr {
     /**
      * Returns the type tag for the expression subtype,
      * for use in pattern-matching expressions. Also
@@ -209,7 +209,7 @@ export module AST {
     toString(): string;
   }
 
-  export class ReferenceRange implements Expression {
+  export class ReferenceRange implements IExpr {
     public static readonly type: "ReferenceRange" = "ReferenceRange";
     public readonly type = ReferenceRange.type;
     public readonly rng: Range;
@@ -227,7 +227,7 @@ export module AST {
     }
   }
 
-  export class ReferenceAddress implements Expression {
+  export class ReferenceAddress implements IExpr {
     public static readonly type: "ReferenceAddress" = "ReferenceAddress";
     public readonly type = ReferenceAddress.type;
     public readonly address: Address;
@@ -245,7 +245,7 @@ export module AST {
     }
   }
 
-  export class ReferenceNamed implements Expression {
+  export class ReferenceNamed implements IExpr {
     public static readonly type: "ReferenceNamed" = "ReferenceNamed";
     public readonly type = ReferenceNamed.type;
     public readonly varName: string;
@@ -282,14 +282,14 @@ export module AST {
 
   export type Arity = FixedArity | LowBoundArity | VarArgsArity;
 
-  export class FunctionApplication implements Expression {
+  export class FunctionApplication implements IExpr {
     public static readonly type: "FunctionApplication" = "FunctionApplication";
     public readonly type = FunctionApplication.type;
     public readonly name: string;
-    public readonly args: Expression[];
+    public readonly args: IExpr[];
     public readonly arity: Arity;
 
-    constructor(env: Env, name: string, args: Expression[], arity: Arity) {
+    constructor(env: Env, name: string, args: IExpr[], arity: Arity) {
       this.name = name;
       this.args = args;
       this.arity = arity;
@@ -314,7 +314,7 @@ export module AST {
     }
   }
 
-  export class Number implements Expression {
+  export class Number implements IExpr {
     public static readonly type: "Number" = "Number";
     public readonly type = Number.type;
     public readonly value: number;
@@ -332,7 +332,7 @@ export module AST {
     }
   }
 
-  export class StringLiteral implements Expression {
+  export class StringLiteral implements IExpr {
     public static readonly type: "StringLiteral" = "StringLiteral";
     public readonly type = StringLiteral.type;
     public readonly value: string;
@@ -350,7 +350,7 @@ export module AST {
     }
   }
 
-  export class Boolean implements Expression {
+  export class Boolean implements IExpr {
     public static readonly type: "Boolean" = "Boolean";
     public readonly type = Boolean.type;
     public readonly value: boolean;
@@ -371,7 +371,7 @@ export module AST {
   // this should only ever be instantiated by
   // the reserved words class, which is designed
   // to fail
-  export class PoisonPill implements Expression {
+  export class PoisonPill implements IExpr {
     public static readonly type: "PoisonPill" = "PoisonPill";
     public readonly type = PoisonPill.type;
 
@@ -384,12 +384,12 @@ export module AST {
     }
   }
 
-  export class ParensExpr implements Expression {
+  export class ParensExpr implements IExpr {
     public static readonly type: "ParensExpr" = "ParensExpr";
     public readonly type = ParensExpr.type;
-    public readonly expr: Expression;
+    public readonly expr: IExpr;
 
-    constructor(expr: Expression) {
+    constructor(expr: IExpr) {
       this.expr = expr;
     }
 
@@ -402,14 +402,14 @@ export module AST {
     }
   }
 
-  export class BinOpExpr implements Expression {
+  export class BinOpExpr implements IExpr {
     public static readonly type: "BinOpExpr" = "BinOpExpr";
     public readonly type = BinOpExpr.type;
     public readonly op: string;
-    public readonly exprL: Expression;
-    public readonly exprR: Expression;
+    public readonly exprL: IExpr;
+    public readonly exprR: IExpr;
 
-    constructor(op: string, exprL: Expression, exprR: Expression) {
+    constructor(op: string, exprL: IExpr, exprR: IExpr) {
       this.op = op;
       this.exprR = exprR;
       this.exprL = exprL;
@@ -432,13 +432,13 @@ export module AST {
     }
   }
 
-  export class UnaryOpExpr implements Expression {
+  export class UnaryOpExpr implements IExpr {
     public static readonly type: "UnaryOpExpr" = "UnaryOpExpr";
     public readonly type = UnaryOpExpr.type;
     public readonly op: string;
-    public readonly expr: Expression;
+    public readonly expr: IExpr;
 
-    constructor(op: string, expr: Expression) {
+    constructor(op: string, expr: IExpr) {
       this.op = op;
       this.expr = expr;
     }
@@ -453,4 +453,16 @@ export module AST {
       );
     }
   }
+
+  export type Expression =
+    | ReferenceRange
+    | ReferenceAddress
+    | ReferenceNamed
+    | FunctionApplication
+    | Number
+    | StringLiteral
+    | Boolean
+    | BinOpExpr
+    | UnaryOpExpr
+    | ParensExpr;
 }

@@ -1373,7 +1373,7 @@ describe("binOp", () => {
   it("should parse an addition expression like A1 + B2", function* () {
     const input = new CU.CharStream("A1 + B2");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "+",
       new AST.ReferenceAddress(
         PP.EnvStub,
@@ -1408,9 +1408,9 @@ describe("binOp", () => {
   it("should correctly deal with precedence in an expresion like A1 * B2 + C3", function* () {
     const input = new CU.CharStream("A1 * B2 + C3");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "+",
-      new AST.BinOpExpression(
+      new AST.BinOpExpr(
         "*",
         new AST.ReferenceAddress(
           PP.EnvStub,
@@ -1456,7 +1456,7 @@ describe("binOp", () => {
   it("should parse a subtraction expression like A1 - B2", function* () {
     const input = new CU.CharStream("A1 - B2");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "-",
       new AST.ReferenceAddress(
         PP.EnvStub,
@@ -1491,7 +1491,7 @@ describe("binOp", () => {
   it("should parse a division expression like A1 / B2", function* () {
     const input = new CU.CharStream("A1 / B2");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "/",
       new AST.ReferenceAddress(
         PP.EnvStub,
@@ -1526,9 +1526,9 @@ describe("binOp", () => {
   it("should handle left-associativity in A1 - B2 + C3", function* () {
     const input = new CU.CharStream("A1 - B2 + C3");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "+",
-      new AST.BinOpExpression(
+      new AST.BinOpExpr(
         "-",
         new AST.ReferenceAddress(
           PP.EnvStub,
@@ -1574,9 +1574,9 @@ describe("binOp", () => {
   it("should handle left-associativity in A1 / B2 * C3", function* () {
     const input = new CU.CharStream("A1 / B2 * C3");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "*",
-      new AST.BinOpExpression(
+      new AST.BinOpExpr(
         "/",
         new AST.ReferenceAddress(
           PP.EnvStub,
@@ -1622,7 +1622,7 @@ describe("binOp", () => {
   it("should parse unary expressions", function* () {
     const input = new CU.CharStream("-R23C45");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.UnaryOpExpression(
+    const expected = new AST.UnaryOpExpr(
       "-",
       new AST.ReferenceAddress(
         PP.EnvStub,
@@ -1647,7 +1647,7 @@ describe("binOp", () => {
   it('should parse a concatenation expression like "foo"&"bar"', function* () {
     const input = new CU.CharStream('"foo"&"bar"');
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "&",
       new AST.StringLiteral(PP.EnvStub, "foo"),
       new AST.StringLiteral(PP.EnvStub, "bar")
@@ -1664,7 +1664,7 @@ describe("binOp", () => {
   it('should parse a comparison expression like "foo"<>"bar"', function* () {
     const input = new CU.CharStream('"foo"<>"bar"');
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "<>",
       new AST.StringLiteral(PP.EnvStub, "foo"),
       new AST.StringLiteral(PP.EnvStub, "bar")
@@ -1681,7 +1681,7 @@ describe("binOp", () => {
   it("should parse a comparison expression like 1=2", function* () {
     const input = new CU.CharStream("1=2");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "=",
       new AST.Number(PP.EnvStub, 1),
       new AST.Number(PP.EnvStub, 2)
@@ -1698,7 +1698,7 @@ describe("binOp", () => {
   it("should parse a comparison expression like A1>2", function* () {
     const input = new CU.CharStream("A1>2");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       ">",
       new AST.ReferenceAddress(
         PP.EnvStub,
@@ -1724,7 +1724,7 @@ describe("binOp", () => {
   it("should parse an exponentiation expression like A1^2", function* () {
     const input = new CU.CharStream("A1^2");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "^",
       new AST.ReferenceAddress(
         PP.EnvStub,
@@ -1750,7 +1750,7 @@ describe("binOp", () => {
   it("should correctly parse exponentiation as right-associative as in A1^(1-2)^B2", function* () {
     const input = new CU.CharStream("A1^(1-2)^B2");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.BinOpExpression(
+    const expected = new AST.BinOpExpr(
       "^",
       new AST.ReferenceAddress(
         PP.EnvStub,
@@ -1762,10 +1762,10 @@ describe("binOp", () => {
           PP.EnvStub
         )
       ),
-      new AST.BinOpExpression(
+      new AST.BinOpExpr(
         "^",
         new AST.ParensExpr(
-          new AST.BinOpExpression(
+          new AST.BinOpExpr(
             "-",
             new AST.Number(PP.EnvStub, 1),
             new AST.Number(PP.EnvStub, 2)
@@ -1795,10 +1795,7 @@ describe("binOp", () => {
   it("should parse a percentage expression like 2%", function* () {
     const input = new CU.CharStream("2%");
     const output = yield* PE.binOp(PR.rangeAny)(input);
-    const expected = new AST.UnaryOpExpression(
-      "%",
-      new AST.Number(PP.EnvStub, 2)
-    );
+    const expected = new AST.UnaryOpExpr("%", new AST.Number(PP.EnvStub, 2));
     switch (output.tag) {
       case "success":
         expect(output.result).to.eql(expected);
@@ -1855,3 +1852,14 @@ describe("parse", () => {
     expect(output).to.eql(expected);
   });
 });
+
+// describe("Expression", () => {
+//   it("subclasses should be pattern-matchable", () => {
+//     const input = "=A1";
+//     const output = Paraformula.parse(input);
+//     switch(output.type) {
+//       case AST.ReferenceAddress.type:
+//         expect(output.)
+//     }
+//   });
+// });

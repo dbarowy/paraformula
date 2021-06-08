@@ -227,7 +227,7 @@ export module Reference {
   /**
    * Parses any range reference.
    */
-  export const addressReference = P.choices<AST.ReferenceExpr>(
+  export const addressReference = P.choices<AST.Expression>(
     addressReferenceWorkbook,
     addressReferenceWorksheet,
     addressReferenceBare
@@ -259,7 +259,7 @@ export module Reference {
   export const namedReference = P.pipe2<
     CU.CharStream,
     CU.CharStream,
-    AST.ReferenceExpr
+    AST.Expression
   >(namedReferenceFirstChar)(namedReferenceLastChars)(
     (c, s) => new AST.ReferenceNamed(PP.EnvStub, c.toString() + s.toString())
   );
@@ -274,7 +274,7 @@ export module Reference {
   /**
    * Parses a string literal.
    */
-  export const stringLiteral: P.IParser<AST.ReferenceExpr> = P.pipe<
+  export const stringLiteral: P.IParser<AST.Expression> = P.pipe<
     CU.CharStream,
     AST.StringLiteral
   >(
@@ -290,7 +290,7 @@ export module Reference {
   /**
    * Parses a boolean literal.
    */
-  export const booleanLiteral: P.IParser<AST.ReferenceExpr> = P.pipe<
+  export const booleanLiteral: P.IParser<AST.Expression> = P.pipe<
     CU.CharStream,
     AST.Boolean
   >(P.choice(P.str("TRUE"))(P.str("FALSE")))(
@@ -302,7 +302,7 @@ export module Reference {
    * @param R A Range parser.
    */
   export function data(R: P.IParser<AST.Range>) {
-    return P.choices<AST.ReferenceExpr>(
+    return P.choices<AST.Expression>(
       rangeReference(R),
       addressReference,
       booleanLiteral,
@@ -311,7 +311,7 @@ export module Reference {
       // are present; the reservedWord parser is a lookahead parser
       // that succeeds, consuming no input, when no reserved words
       // are present at the start of the input stream
-      P.right<undefined, AST.ReferenceExpr>(RW.reservedWord)(
+      P.right<undefined, AST.Expression>(RW.reservedWord)(
         P.choices(stringLiteral, namedReference)
       )
     );

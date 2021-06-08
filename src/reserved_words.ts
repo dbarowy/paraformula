@@ -1474,7 +1474,7 @@ export module ReservedWords {
         arityAtLeast3FunctionName,
         varArgsFunctionName
       )
-    )((cs) => new AST.PoisonPill(PP.EnvStub))
+    )((cs) => new AST.PoisonPill())
   )("Cannot parse a reserved word.") as P.IParser<undefined>;
 
   /**

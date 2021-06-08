@@ -171,7 +171,7 @@ export module Expression {
     )(level1(R))((es, e) => {
       if (es.length > 0) {
         const exps = rev(es).reduce((acc, lhs) => {
-          const exp = new AST.BinOpExpression(lhs.op, lhs.expr, acc);
+          const exp = new AST.BinOpExpr(lhs.op, lhs.expr, acc);
           return exp;
         }, e);
         return exps;
@@ -205,10 +205,7 @@ export module Expression {
     )(
       // yields a binop from a list of multiplicands
       (t1, t2) =>
-        t2.reduce(
-          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
-          t1
-        )
+        t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -236,10 +233,7 @@ export module Expression {
     )(
       // yields a binop from a list of addends
       (t1, t2) =>
-        t2.reduce(
-          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
-          t1
-        )
+        t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -261,10 +255,7 @@ export module Expression {
     )(
       // yields a binop from a list of addends
       (t1, t2) =>
-        t2.reduce(
-          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
-          t1
-        )
+        t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -303,10 +294,7 @@ export module Expression {
     )(
       // yields a binop from a list of addends
       (t1, t2) =>
-        t2.reduce(
-          (acc, rhs) => new AST.BinOpExpression(rhs.op, acc, rhs.expr),
-          t1
-        )
+        t2.reduce((acc, rhs) => new AST.BinOpExpr(rhs.op, acc, rhs.expr), t1)
     );
   }
 
@@ -318,13 +306,13 @@ export module Expression {
     return P.choices<AST.Expression>(
       P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(P.char("+"))(
         exprSimple(R)
-      )((sign, e) => new AST.UnaryOpExpression("+", e)),
+      )((sign, e) => new AST.UnaryOpExpr("+", e)),
       P.pipe2<CU.CharStream, AST.Expression, AST.Expression>(P.char("-"))(
         exprSimple(R)
-      )((sign, e) => new AST.UnaryOpExpression("-", e)),
+      )((sign, e) => new AST.UnaryOpExpr("-", e)),
       P.pipe2<AST.Expression, CU.CharStream, AST.Expression>(exprSimple(R))(
         P.char("%")
-      )((e, op) => new AST.UnaryOpExpression("%", e))
+      )((e, op) => new AST.UnaryOpExpr("%", e))
     );
   }
 
@@ -595,7 +583,7 @@ export module Expression {
    * Parses either functions or data.
    */
   export function exprAtom(R: P.IParser<AST.Range>) {
-    return P.choice<AST.ReferenceExpr>(fApply(R))(PRF.data(R));
+    return P.choice<AST.Expression>(fApply(R))(PRF.data(R));
   }
 
   /**

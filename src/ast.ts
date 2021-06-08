@@ -261,7 +261,7 @@ export module AST {
     public static readonly type: 'FunctionApplication' = 'FunctionApplication';
     public readonly type = FunctionApplication.type;
     public readonly name: string;
-    public readonly args: IExpr[];
+    public readonly args: Expression[];
     public readonly arity: Arity;
 
     constructor(name: string, args: Expression[], arity: Arity) {

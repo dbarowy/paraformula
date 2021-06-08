@@ -264,7 +264,7 @@ export module AST {
     public readonly args: IExpr[];
     public readonly arity: Arity;
 
-    constructor(name: string, args: IExpr[], arity: Arity) {
+    constructor(name: string, args: Expression[], arity: Arity) {
       this.name = name;
       this.args = args;
       this.arity = arity;

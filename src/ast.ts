@@ -75,8 +75,11 @@ export module AST {
       return '(' + this.column.toString() + ',' + this.row.toString() + ')';
     }
 
+    /**
+     * Pretty-prints an address in A1 format.
+     */
     public get toFormula(): string {
-      return '';
+      return this.toA1Ref();
     }
 
     /**
@@ -159,7 +162,7 @@ export module AST {
     }
 
     public get toFormula(): string {
-      return this.regions.map(([tl, br]) => tl.toString() + ':' + br.toString()).join(',');
+      return this.regions.map(([tl, br]) => tl.toFormula + ':' + br.toFormula).join(',');
     }
   }
 

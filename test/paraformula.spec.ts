@@ -1451,7 +1451,7 @@ describe('Formula pretty printer', () => {
   it("should reproduce the parser's input for ranges", () => {
     const input = '=SUM(A1:A10)';
     const output = Paraformula.parse(input);
-    const input2 = output.toFormula;
+    const input2 = output.toFormula();
     // input2 won't contain an '=' but should otherwise be the same
     expect('=' + input2).to.eql(input);
   });

@@ -1400,6 +1400,26 @@ describe('parse', () => {
     );
     expect(output).to.eql(expected);
   });
+  it('should parse the real-world expression "=MAX(B6-40,0)"', () => {
+    const input = '=MAX(B6-40,0)';
+    const output = Paraformula.parse(input);
+    const expected = new AST.FunctionApplication(
+      'MAX',
+      [
+        new AST.BinOpExpr(
+          '-',
+          new AST.ReferenceAddress(
+            PP.EnvStub,
+            new AST.Address(6, 2, AST.RelativeAddress, AST.RelativeAddress, PP.EnvStub)
+          ),
+          new AST.Number(40)
+        ),
+        new AST.Number(0),
+      ],
+      new AST.LowBoundArity(1)
+    );
+    expect(output).to.eql(expected);
+  });
 });
 
 describe('yieldableParse', () => {

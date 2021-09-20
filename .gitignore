@@ -106,3 +106,5 @@ dist
 dist
 
 examples/simpleBench
+
+.DS_Store
